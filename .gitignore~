@@ -149,4 +149,3 @@ skyseg.onnx
 *.egg-info
 # personalized ignore
 anafi_usa_20250812-selected/
-.gradio/
