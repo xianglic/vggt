@@ -38,7 +38,7 @@ build-backend = "setuptools.build_meta"
 # setuptools configuration
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["vggt*"]
+include = ["vggt*", "vggt_needle*"]
 
 # Pixi configuration
 [tool.pixi.workspace]
@@ -47,6 +47,8 @@ platforms = ["linux-64"]
 
 [tool.pixi.pypi-dependencies]
 vggt = { path = ".", editable = true }
+vggt_needle = { path = ".", editable = true }
+
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

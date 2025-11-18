@@ -147,6 +147,7 @@ skyseg.onnx
 # pixi environments
 .pixi
 *.egg-info
+
 # personalized ignore
-anafi_usa_20250812-selected/
+examples/drone/
 .gradio/
