@@ -11,9 +11,9 @@
 import os
 from typing import List, Dict, Tuple, Union
 
-from needle import nn, ops, init, Tensor
-from vggt.heads.head_act import activate_head
-from vggt.heads.utils import create_uv_grid, position_grid_to_embed
+from vggt_needle.needle import nn, ops, init, Tensor
+from vggt_needle.heads.head_act import activate_head
+from vggt_needle.heads.utils import create_uv_grid, position_grid_to_embed
 
 
 class DPTHead(nn.Module):

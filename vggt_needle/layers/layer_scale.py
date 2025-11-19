@@ -7,9 +7,9 @@
 
 from typing import Union
 
-import needle
-from needle import Tensor
-from needle import nn
+import vggt_needle.needle as needle
+from vggt_needle.needle import Tensor
+from vggt_needle.needle import nn
 
 
 class LayerScale(nn.Module):

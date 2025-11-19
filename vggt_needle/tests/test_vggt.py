@@ -7,10 +7,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 import torch
 
-from needle import Tensor
+from vggt_needle.needle import Tensor
 
 # 🔧 Adjust if VGGT lives somewhere else, e.g. vggt.models.vggt_model
-from vggt.models.vggt import VGGT
+from vggt_needle.models.vggt import VGGT
 
 
 def test_vggt_forward_with_tracking():

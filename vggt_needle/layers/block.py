@@ -14,12 +14,12 @@ from typing import Callable, Optional, Sequence, Tuple
 import numpy as np
 import warnings
 
-from needle import nn, Tensor
+from vggt_needle.needle import nn, Tensor
 
-from vggt.layers.attention import Attention
-from vggt.layers.layer_scale import LayerScale
-from vggt.layers.mlp import Mlp
-from needle import ops
+from vggt_needle.layers.attention import Attention
+from vggt_needle.layers.layer_scale import LayerScale
+from vggt_needle.layers.mlp import Mlp
+from vggt_needle.needle import ops
 
 class Block(nn.Module):
     def __init__(

@@ -8,11 +8,11 @@
 # Modified from https://github.com/facebookresearch/co-tracker/
 
 import math
-from needle import nn, ops, init, Tensor
+from vggt_needle.needle import nn, ops, init, Tensor
 
-from vggt.heads.track_modules.utils import bilinear_sampler
-from vggt.heads.track_modules.modules import AttnBlock, CrossAttnBlock
-from vggt.heads.utils import needle_meshgrid as meshgrid, needle_linspace as linspace
+from vggt_needle.heads.track_modules.utils import bilinear_sampler
+from vggt_needle.heads.track_modules.modules import AttnBlock, CrossAttnBlock
+from vggt_needle.heads.utils import vggt_needle.needle_meshgrid as meshgrid, needle_linspace as linspace
 
 
 class EfficientUpdateFormer(nn.Module):

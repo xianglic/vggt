@@ -4,7 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from needle import nn, Tensor, ops, init
+from vggt_needle.needle import nn, Tensor, ops, init
 
 
 def position_grid_to_embed(pos_grid: Tensor, embed_dim: int, omega_0: float = 100) -> Tensor:

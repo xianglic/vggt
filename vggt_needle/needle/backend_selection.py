@@ -4,7 +4,6 @@ import os
 
 BACKEND = os.environ.get("NEEDLE_BACKEND", "nd")
 
-
 if BACKEND == "nd":
     print("Using needle backend")
     from . import backend_ndarray as array_api

@@ -1,5 +1,5 @@
 from ..autograd import Op, Tensor, TensorTuple, Value, TensorOp, TensorTupleOp
-import needle.init as init
+import vggt_needle.needle.init as init
 
 class MakeTensorTuple(TensorTupleOp):
     def compute(self, *args) -> tuple:

@@ -3,9 +3,9 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from needle import Tensor
-from needle import nn
-from vggt.layers.patch_embed import *
+from vggt_needle.needle import Tensor
+from vggt_needle.needle import nn
+from vggt_needle.layers.patch_embed import *
 
 if __name__ == "__main__":
     import numpy as np

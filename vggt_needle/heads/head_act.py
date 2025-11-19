@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
-from needle import ops, Tensor
+from vggt_needle.needle import ops, Tensor
 
 def activate_pose(pred_pose_enc, trans_act="linear", quat_act="linear", fl_act="linear"):
     """

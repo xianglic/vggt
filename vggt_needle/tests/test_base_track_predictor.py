@@ -7,9 +7,9 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 import torch
 
-from needle import Tensor
+from vggt_needle.needle import Tensor
 
-from vggt.heads.track_modules.base_track_predictor import BaseTrackerPredictor
+from vggt_needle.heads.track_modules.base_track_predictor import BaseTrackerPredictor
 
 
 def make_dummy_inputs(

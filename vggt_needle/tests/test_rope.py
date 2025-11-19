@@ -7,9 +7,9 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 import torch
 
-from vggt.layers.rope import RotaryPositionEmbedding2D as NeedleRoPE
+from vggt_needle.layers.rope import RotaryPositionEmbedding2D as NeedleRoPE
 
-from needle import Tensor
+from vggt_needle.needle import Tensor
 
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #

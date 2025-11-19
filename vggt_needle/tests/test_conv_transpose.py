@@ -7,10 +7,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 import torch
 
-from needle import Tensor
-from needle import ops
+from vggt_needle.needle import Tensor
+from vggt_needle.needle import ops
 
-from needle.nn import ConvTranspose2d  
+from vggt_needle.needle.nn import ConvTranspose2d  
 
 
 # ------ Helpers ------

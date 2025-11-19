@@ -7,11 +7,11 @@
 import math
 import numpy as np
 
-from needle import Tensor, nn, init, ops
+from vggt_needle.needle import Tensor, nn, init, ops
 
-from vggt.layers import Mlp
-from vggt.layers.block import Block
-from vggt.heads.head_act import activate_pose
+from vggt_needle.layers import Mlp
+from vggt_needle.layers.block import Block
+from vggt_needle.heads.head_act import activate_pose
 
 
 class CameraHead(nn.Module):

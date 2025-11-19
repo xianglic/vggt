@@ -6,8 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import numpy as np
 
-from needle import Tensor, nn
-from vggt.layers.mlp import Mlp   # <- adjust if this class lives in a different module
+from vggt_needle.needle import Tensor, nn
+from vggt_needle.layers.mlp import Mlp   # <- adjust if this class lives in a different module
 
 
 def mlp_forward_numpy(x, W1, b1, W2, b2):

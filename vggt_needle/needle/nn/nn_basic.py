@@ -1,9 +1,9 @@
 """The module.
 """
 from typing import Any
-from needle.autograd import Tensor
-from needle import ops
-import needle.init as init
+from vggt_needle.needle.autograd import Tensor
+from vggt_needle.needle import ops
+import vggt_needle.needle.init as init
 import numpy as np
 
 

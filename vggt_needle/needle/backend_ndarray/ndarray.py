@@ -7,7 +7,7 @@ import numpy as np
 
 from . import ndarray_backend_numpy
 from . import ndarray_backend_cpu  # type: ignore[attr-defined]
-
+from . import ndarray_backend_cuda
 
 # math.prod not in Python 3.7
 def prod(x: Iterable[int]) -> int:
@@ -85,6 +85,7 @@ class BackendDevice:
 
 def cuda() -> BackendDevice:
     """Return cuda device"""
+    print("nd_gpu")
     try:
         from . import ndarray_backend_cuda  # type: ignore[attr-defined]
 
@@ -95,11 +96,13 @@ def cuda() -> BackendDevice:
 
 def cpu_numpy() -> BackendDevice:
     """Return numpy device"""
+    print("np")
     return BackendDevice("cpu_numpy", ndarray_backend_numpy)
 
 
 def cpu() -> BackendDevice:
     """Return cpu device"""
+    print("nd_cpu")
     return BackendDevice("cpu", ndarray_backend_cpu)
 
 

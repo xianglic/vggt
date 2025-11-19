@@ -12,7 +12,7 @@ import collections
 from itertools import repeat
 
 
-from needle import Tensor, nn, init, ops
+from vggt_needle.needle import Tensor, nn, init, ops
 
 def _ntuple(n):
     def parse(x):

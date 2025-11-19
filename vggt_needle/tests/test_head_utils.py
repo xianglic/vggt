@@ -6,14 +6,14 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 import torch
 
-from needle import Tensor, ops, init
+from vggt_needle.needle import Tensor, ops, init
 
 # -------------------------------------------------------------------
 # IMPORT YOUR NEEDLE IMPLEMENTATIONS HERE
 # -------------------------------------------------------------------
 # Replace `your_module` with the actual filename (without .py)
 # e.g. from pos_embed import ...
-from vggt.heads.utils import (
+from vggt_needle.heads.utils import (
     needle_linspace,
     needle_meshgrid,
     create_uv_grid,
@@ -142,7 +142,7 @@ def test_meshgrid():
     print("Testing needle_meshgrid vs torch.meshgrid...")
 
     width, height = 7, 5
-    # You can also generate from needle_linspace, but it's nice to test
+    # You can also generate from vggt_needle.needle_linspace, but it's nice to test
     # against arbitrary coordinates as well.
     x = np.linspace(-1.0, 1.0, width).astype("float32")
     y = np.linspace(-0.5, 0.5, height).astype("float32")

@@ -12,8 +12,8 @@ import math
 import logging
 from typing import Sequence, Tuple, Union, Callable
 
-from needle import nn, Tensor, init, ops
-from vggt.layers import Mlp, PatchEmbed, SwiGLUFFNFused, Block
+from vggt_needle.needle import nn, Tensor, init, ops
+from vggt_needle.layers import Mlp, PatchEmbed, SwiGLUFFNFused, Block
 
 logger = logging.getLogger("dinov2")
 

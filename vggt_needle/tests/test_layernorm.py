@@ -4,11 +4,11 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
-from needle import nn as nn_custom
+from vggt_needle.needle import nn as nn_custom
 from torch import nn as nn_torch
 
 import torch
-import needle
+import vggt_needle.needle
 import numpy as np
 
 

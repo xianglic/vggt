@@ -6,11 +6,11 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import numpy as np
 
-from needle import Tensor
+from vggt_needle.needle import Tensor
 
 # 🔧 Adjust this to your actual file path
-# e.g. from vggt.blocks.attn_blocks import Mlp, AttnBlock, CrossAttnBlock
-from vggt.heads.track_modules.modules import Mlp, AttnBlock, CrossAttnBlock
+# e.g. from vggt_needle.blocks.attn_blocks import Mlp, AttnBlock, CrossAttnBlock
+from vggt_needle.heads.track_modules.modules import Mlp, AttnBlock, CrossAttnBlock
 
 
 def test_mlp_linear():

@@ -13,10 +13,10 @@ Usage:
 import argparse
 import math
 
-from needle import init, ops, Tensor
-from needle import nn
+from vggt_needle.needle import init, ops, Tensor
+from vggt_needle.needle import nn
 
-from vggt.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2, DinoVisionTransformer
+from vggt_needle.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2, DinoVisionTransformer
 
 
 def build_model(name: str, img_size: int, chunked: bool = False) -> nn.Module:

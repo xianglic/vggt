@@ -6,9 +6,9 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import numpy as np
 
-from needle import Tensor
-from needle import nn
-from vggt.layers.block import *
+from vggt_needle.needle import Tensor
+from vggt_needle.needle import nn
+from vggt_needle.layers.block import *
 
 
 

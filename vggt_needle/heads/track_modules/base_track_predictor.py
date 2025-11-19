@@ -4,10 +4,10 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from needle import nn, ops, init, Tensor
-from vggt.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
-from vggt.heads.track_modules.utils import sample_features4d, get_2d_embedding, get_2d_sincos_pos_embed
-from vggt.heads.track_modules.modules import Mlp
+from vggt_needle.needle import nn, ops, init, Tensor
+from vggt_needle.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
+from vggt_needle.heads.track_modules.utils import sample_features4d, get_2d_embedding, get_2d_sincos_pos_embed
+from vggt_needle.heads.track_modules.modules import Mlp
 
 import torch
 class BaseTrackerPredictor(nn.Module):

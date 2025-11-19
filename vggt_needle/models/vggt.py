@@ -4,11 +4,11 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from needle import nn, ops, Tensor, init
-from vggt.models.aggregator import Aggregator
-from vggt.heads.camera_head import CameraHead
-from vggt.heads.dpt_head import DPTHead
-from vggt.heads.track_head import TrackHead
+from vggt_needle.needle import nn, ops, Tensor, init
+from vggt_needle.models.aggregator import Aggregator
+from vggt_needle.heads.camera_head import CameraHead
+from vggt_needle.heads.dpt_head import DPTHead
+from vggt_needle.heads.track_head import TrackHead
 
 
 class VGGT(nn.Module):

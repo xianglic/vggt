@@ -6,8 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import numpy as np
 
-from needle import Tensor, nn
-from vggt.layers.swiglu_ffn import SwiGLU
+from vggt_needle.needle import Tensor, nn
+from vggt_needle.layers.swiglu_ffn import SwiGLU
 
 
 def test_mlp_forward():

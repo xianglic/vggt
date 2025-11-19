@@ -6,13 +6,13 @@
 
 import logging
 import numpy as np
-from needle import nn, init, Tensor, ops
+from vggt_needle.needle import nn, init, Tensor, ops
 from typing import Optional, Tuple, Union, List, Dict, Any
 
-from vggt.layers import PatchEmbed
-from vggt.layers.block import Block
-from vggt.layers.rope import RotaryPositionEmbedding2D, PositionGetter
-from vggt.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2
+from vggt_needle.layers import PatchEmbed
+from vggt_needle.layers.block import Block
+from vggt_needle.layers.rope import RotaryPositionEmbedding2D, PositionGetter
+from vggt_needle.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2
 
 logger = logging.getLogger(__name__)
 

@@ -17,9 +17,9 @@ Checks:
 import argparse
 import numpy as np
 
-from needle import Tensor, init
+from vggt_needle.needle import Tensor, init
 
-from vggt.heads.camera_head import CameraHead
+from vggt_needle.heads.camera_head import CameraHead
 
 
 def make_dummy_aggregated_tokens_list(

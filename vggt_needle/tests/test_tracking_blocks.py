@@ -8,11 +8,11 @@ import numpy as np
 import math
 import torch
 
-from needle import Tensor
+from vggt_needle.needle import Tensor
 
 # 🔧 adjust this to your actual file path where EfficientUpdateFormer / CorrBlock live
-# e.g. from vggt.heads.track_modules.update_former import EfficientUpdateFormer, CorrBlock
-from vggt.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
+# e.g. from vggt_needle.heads.track_modules.update_former import EfficientUpdateFormer, CorrBlock
+from vggt_needle.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
 
 
 def test_efficient_update_former_forward(add_space_attn: bool = True):

@@ -8,8 +8,8 @@ import numpy as np
 import torch
 import torch.nn as nn_torch
 
-from needle import Tensor, ops, init
-from needle.nn import Conv
+from vggt_needle.needle import Tensor, ops, init
+from vggt_needle.needle.nn import Conv
 
 
 # ---- Test utilities ----

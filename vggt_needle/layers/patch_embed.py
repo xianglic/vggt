@@ -9,7 +9,7 @@
 
 from typing import Callable, Optional, Tuple, Union
 
-from needle import Tensor, nn
+from vggt_needle.needle import Tensor, nn
 
 
 def make_2tuple(x):

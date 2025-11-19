@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 import os
 import sys
-# sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-
-
 import argparse
 import numpy as np
 
-from needle import nn, init, Tensor
-from needle import ops
+from vggt_needle.needle import nn, init, Tensor
+from vggt_needle.needle import ops
 
-from vggt.models.aggregator import Aggregator
+from vggt_needle.models.aggregator import Aggregator
 
 
 def build_small_aggregator(

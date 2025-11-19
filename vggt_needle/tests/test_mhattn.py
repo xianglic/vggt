@@ -7,9 +7,9 @@ import numpy as np
 import torch
 
 # 🔧 Adjust these imports to your actual paths
-# e.g. from needle.nn import MultiheadAttention
-from needle import Tensor
-from needle.nn import MultiheadAttention
+# e.g. from vggt_needle.needle.nn import MultiheadAttention
+from vggt_needle.needle import Tensor
+from vggt_needle.needle.nn import MultiheadAttention
 
 
 def copy_torch_mha_to_needle(torch_mha: torch.nn.MultiheadAttention,

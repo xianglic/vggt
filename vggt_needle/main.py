@@ -1,6 +1,6 @@
 import torch
-from needle import Tensor, nn
-from vggt.models.vggt import VGGT
+from vggt_needle.needle import Tensor, nn
+from vggt_needle.models.vggt import VGGT
 
 # -----------------------------
 # 1. Load pretrained SD from HF

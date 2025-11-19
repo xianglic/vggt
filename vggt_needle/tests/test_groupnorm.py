@@ -8,9 +8,9 @@ import numpy as np
 import torch
 
 # 🔧 Adjust these imports to your project layout:
-# e.g. from needle.nn import GroupNorm
-from needle import Tensor
-from needle.nn import GroupNorm
+# e.g. from vggt_needle.needle.nn import GroupNorm
+from vggt_needle.needle import Tensor
+from vggt_needle.needle.nn import GroupNorm
 
 
 def copy_torch_groupnorm_to_needle(torch_gn: torch.nn.GroupNorm, needle_gn: GroupNorm):

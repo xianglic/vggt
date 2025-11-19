@@ -20,10 +20,10 @@ We only test the branches that are currently implemented in the Needle code:
 import numpy as np
 import torch
 
-from needle import Tensor, ops, init
+from vggt_needle.needle import Tensor, ops, init
 
 
-from vggt.heads.head_act import (
+from vggt_needle.heads.head_act import (
     inverse_log_transform,
     base_pose_act,
     activate_pose,
