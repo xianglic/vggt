@@ -225,7 +225,22 @@ class Tensor(Value):
             cached_data=cached_data,
             requires_grad=requires_grad,
         )
+        
+    def to(self, device) -> "Tensor":
+        data = self.realize_cached_data()
 
+        if hasattr(data, "device") and data.device == device:
+            return self
+
+        if hasattr(data, "to"):
+            new_nd = data.to(device)
+        else:
+            new_nd = Tensor._array_from_numpy(
+                numpy.array(data), device=device, dtype=self.dtype
+            )
+
+        return Tensor.make_const(new_nd, requires_grad=self.requires_grad)
+            
     @staticmethod
     def _array_from_numpy(numpy_array, device, dtype):
         if array_api is numpy:

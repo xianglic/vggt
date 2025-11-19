@@ -29,6 +29,9 @@ demo = [
     "trimesh",
     "matplotlib",
 ]
+needle = [
+    "pybind11",
+]
 
 # Using setuptools as the build backend
 [build-system]

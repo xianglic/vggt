@@ -8,50 +8,17 @@ from vggt_needle.needle import nn, init, Tensor
 from vggt_needle.needle import ops
 
 from vggt_needle.models.aggregator import Aggregator
+from vggt_needle.needle import backend_ndarray as nd
 
-
-def build_small_aggregator(
-    img_size: int,
-    patch_size: int,
-    depth: int,
-    embed_dim: int,
-    num_heads: int,
-    num_register_tokens: int,
-    aa_block_size: int = 1,
-    aa_order=None,
-    rope_freq: int = 100,
-) -> Aggregator:
-    if aa_order is None:
-        aa_order = ["frame", "global"]
-
-    agg = Aggregator(
-        img_size=img_size,
-        patch_size=patch_size,
-        embed_dim=embed_dim,
-        depth=depth,
-        num_heads=num_heads,
-        mlp_ratio=4.0,
-        num_register_tokens=num_register_tokens,
-        block_fn=Aggregator.__mro__[0].__dict__.get("frame_blocks", None) or None,  # ignored, overridden below
-        qkv_bias=True,
-        proj_bias=True,
-        ffn_bias=True,
-        patch_embed="conv",    # use conv PatchEmbed (lightweight)
-        aa_order=aa_order,
-        aa_block_size=aa_block_size,
-        qk_norm=True,
-        rope_freq=rope_freq,
-        init_values=0.01,
-    )
-    return agg
-
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def make_dummy_video(B: int, S: int, H: int, W: int) -> Tensor:
     """
     Create dummy video input: [B, S, 3, H, W], values in [0, 1].
     """
     x_np = np.random.rand(B, S, 3, H, W).astype("float32")
-    return Tensor(x_np)
+    return Tensor(x_np).to(device)
 
 
 def test_aggregator_once(
@@ -82,7 +49,7 @@ def test_aggregator_once(
         num_heads=num_heads,
         num_register_tokens=num_register_tokens,
         patch_embed="dinov2_vits14_reg"
-    )
+    ).to(device)
     
 
     # dummy input

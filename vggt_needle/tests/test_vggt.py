@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-
 import numpy as np
 import torch
 
@@ -30,7 +27,7 @@ def test_vggt_forward_with_tracking():
     N = 5          # number of query points
     img_size = 518
     patch_size = 14
-    embed_dim = 384  # default
+    embed_dim = 1024  # default
 
     # ------------------------------------------------------------------
     # Dummy images: (B, S, 3, H, W)

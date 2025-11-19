@@ -103,6 +103,27 @@ class Module:
         self.training = True
         self._buffers = {}   # name -> Tensor or None
 
+    def to(self, device):
+        """
+        Move all parameters and buffers of this module (and children)
+        to the given device.
+
+        device can be:
+          - nd.cpu(), nd.cuda() (BackendDevice), or
+          - "cpu", "cuda" (if you want to support strings).
+        """
+        # Walk all named tensors (params + buffers)
+        state = self.state_dict()
+        for name, t in state.items():
+            if not isinstance(t, Tensor):
+                continue
+
+            # Use Tensor.to(device) we just defined
+            moved = t.to(device)
+            self._set_by_name(name, moved)
+
+        return self
+    
     def register_buffer(self, name: str, tensor):
         """
         Register a persistent buffer (non-parameter tensor).
