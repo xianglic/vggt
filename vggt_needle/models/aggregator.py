@@ -129,7 +129,7 @@ class Aggregator(nn.Module):
         self.patch_start_idx = 1 + num_register_tokens
 
         # Register normalization constants as buffers
-        for name, value in (("_resnet_mean", _RESNET_MEAN), ("_resnet_std", _RESNET_STD)):
+        for name, value in (("resnet_mean", _RESNET_MEAN), ("resnet_std", _RESNET_STD)):
             self.register_buffer(name, Tensor(np.array(value).reshape(1, 1, 3, 1, 1)))
 
         self.use_reentrant = False # hardcoded to False
@@ -192,7 +192,7 @@ class Aggregator(nn.Module):
             raise ValueError(f"Expected 3 input channels, got {C_in}")
 
         # Normalize images and reshape for patch embed
-        images = (images - self._resnet_mean.broadcast_to(images.shape)) / self._resnet_std.broadcast_to(images.shape)
+        images = (images - self.resnet_mean.broadcast_to(images.shape)) / self.resnet_std.broadcast_to(images.shape)
 
         # Reshape to [B*S, C, H, W] for patch embedding
         images = images.reshape((B * S, C_in, H, W))

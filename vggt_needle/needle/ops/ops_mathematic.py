@@ -341,7 +341,7 @@ class MatMul(TensorOp):
         
         b2 = b.reshape((B, k, n))
 
-        out2 = array_api.empty((B, m, n))
+        out2 = array_api.empty((B, m, n), device=a.device)
         for i in range(B):
             out2[i, :, :] = (a2[i, :, :].compact().reshape((m, k)) @ b2[i, :, :].compact().reshape((k, n))).reshape((1, m, n))   # (m, n)
 
