@@ -10,6 +10,9 @@ from vggt_needle.needle import Tensor
 from vggt_needle.needle import nn
 from vggt_needle.layers.attention import Attention  # <-- change this if Attention is in another module
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def attention_forward_numpy(attn: Attention, x_np: np.ndarray) -> np.ndarray:
     """
@@ -76,7 +79,7 @@ def test_attention_forward_shape():
         proj_bias=True,
         qk_norm=False,
         rope=None,
-    )
+    ).to(device)
 
     y = attn(x)  # Tensor
     y_np = y.numpy()
@@ -95,7 +98,7 @@ def test_attention_forward_numeric():
     np.random.seed(1)
     B, N, C = 3, 5, 32
     x_np = np.random.randn(B, N, C).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     attn = Attention(
         dim=C,
@@ -104,7 +107,7 @@ def test_attention_forward_numeric():
         proj_bias=True,
         qk_norm=False,
         rope=None,
-    )
+    ).to(device)
 
     # needle output
     y = attn(x).numpy()

@@ -11,6 +11,10 @@ from vggt_needle.needle import Tensor
 
 from vggt_needle.heads.track_modules.base_track_predictor import BaseTrackerPredictor
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+# device = nd.cpu()
+print(device)
 
 def make_dummy_inputs(
     B: int = 2,
@@ -33,11 +37,11 @@ def make_dummy_inputs(
     coords_np[..., 0] = np.random.uniform(0, HH - 1, size=(B, N))  # y or x, not super important
     coords_np[..., 1] = np.random.uniform(0, WW - 1, size=(B, N))
 
-    query_points = Tensor(coords_np)
+    query_points = Tensor(coords_np).to(device)
 
     # Feature maps: random latent-dim channels
     fmaps_np = np.random.randn(B, S, C, HH, WW).astype("float32")
-    fmaps = Tensor(fmaps_np)
+    fmaps = Tensor(fmaps_np).to(device)
 
     return query_points, fmaps
 
@@ -68,7 +72,7 @@ def test_base_tracker_forward_basic():
         depth=3,
         max_scale=518,
         predict_conf=True,
-    )
+    ).to(device)
 
     coord_preds, vis_e, conf_e = model(
         query_points=query_points,
@@ -128,7 +132,7 @@ def test_base_tracker_forward_with_feats():
         depth=2,
         max_scale=256,
         predict_conf=False,  # also test predict_conf=False
-    )
+    ).to(device)
 
     coord_preds, vis_e, track_feats, query_track_feat, conf_e = model(
         query_points=query_points,

@@ -11,6 +11,9 @@ from vggt_needle.needle import nn
 from vggt_needle.layers.block import *
 
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 
 if __name__ == "__main__":
@@ -23,7 +26,7 @@ if __name__ == "__main__":
         num_heads = 4
 
         x_np = np.random.randn(B, N, D).astype("float32")
-        x = Tensor(x_np, requires_grad=True)
+        x = Tensor(x_np, requires_grad=True).to(device)
 
         block = Block(
             dim=D,
@@ -43,7 +46,7 @@ if __name__ == "__main__":
             qk_norm=False,
             fused_attn=False,
             rope=None,
-        )
+        ).to(device)
 
         y = block(x)      # (B, N, D)
         assert y.shape == x.shape

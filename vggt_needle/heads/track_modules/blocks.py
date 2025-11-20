@@ -155,7 +155,7 @@ class CorrBlock:
             current_fmaps = torch.nn.functional.avg_pool2d(current_fmaps, kernel_size=2, stride=2)
             _, _, H_new, W_new = current_fmaps.shape
             current_fmaps = current_fmaps.reshape(B, S, C, H_new, W_new)
-            self.fmaps_pyramid.append(Tensor(current_fmaps.numpy()))
+            self.fmaps_pyramid.append(Tensor(current_fmaps.numpy(), device=fmaps.device))
 
         # Precompute a delta grid (of shape (2r+1, 2r+1, 2)) for sampling.
         # This grid is added to the (scaled) coordinate centroids.
@@ -211,7 +211,7 @@ class CorrBlock:
             # We reshape corrs to (B * S * N, 1, H, W) so grid_sample acts over each target.
             corrs_sampled = Tensor(bilinear_sampler(
                 torch.from_numpy(corrs.numpy().reshape(B * S * N, 1, H, W)), torch.from_numpy(coords_lvl.numpy()), padding_mode=self.padding_mode
-            ).numpy())
+            ).numpy(), device=targets.device)
             # The sampled output is (B * S * N, 1, 2r+1, 2r+1). Flatten the last two dims.
             corrs_sampled = corrs_sampled.reshape((B, S, N, -1))  # Now shape: (B, S, N, (2r+1)^2)
             out_pyramid.append(corrs_sampled)

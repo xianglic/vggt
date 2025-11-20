@@ -305,6 +305,7 @@ DEFINE_SCALAR_KERNEL(ScalarMul, a[gid] * val)
 DEFINE_EWISE_KERNEL(EwiseDiv,  a[gid] / b[gid])
 DEFINE_SCALAR_KERNEL(ScalarDiv, a[gid] / val)
 DEFINE_SCALAR_KERNEL(ScalarPower, powf(a[gid], val))
+DEFINE_EWISE_KERNEL(EwisePow,  powf(a[gid], b[gid]))
 DEFINE_EWISE_KERNEL(EwiseMaximum,  a[gid] > b[gid] ? a[gid] : b[gid])
 DEFINE_SCALAR_KERNEL(ScalarMaximum, a[gid] > val    ? a[gid] : val)
 DEFINE_EWISE_KERNEL(EwiseEq,  a[gid] == b[gid] ? 1.0f : 0.0f)
@@ -314,6 +315,9 @@ DEFINE_SCALAR_KERNEL(ScalarGe, a[gid] >= val    ? 1.0f : 0.0f)
 DEFINE_SINGLE_KERNEL(EwiseLog,  logf(a[gid]))
 DEFINE_SINGLE_KERNEL(EwiseExp,  expf(a[gid]))
 DEFINE_SINGLE_KERNEL(EwiseTanh, tanhf(a[gid]))
+DEFINE_SINGLE_KERNEL(EwiseCos,  cosf(a[gid]))
+DEFINE_SINGLE_KERNEL(EwiseSin,  sinf(a[gid]))
+
 void EwiseMul(const CudaArray& a, const CudaArray& b, CudaArray* out) {
   CudaDims dim = CudaOneDim(out->size);
   EwiseMulKernel<<<dim.grid, dim.block>>>(a.ptr, b.ptr, out->ptr, out->size);
@@ -333,6 +337,10 @@ void ScalarDiv(const CudaArray& a, scalar_t val, CudaArray* out) {
 void ScalarPower(const CudaArray& a, scalar_t val, CudaArray* out) {
   CudaDims dim = CudaOneDim(out->size);
   ScalarPowerKernel<<<dim.grid, dim.block>>>(a.ptr, val, out->ptr, out->size);
+}
+void EwisePow(const CudaArray& a, const CudaArray& b, CudaArray* out) {
+  CudaDims dim = CudaOneDim(out->size);
+  EwisePowKernel<<<dim.grid, dim.block>>>(a.ptr, b.ptr, out->ptr, out->size);
 }
 void EwiseMaximum(const CudaArray& a, const CudaArray& b, CudaArray* out) {
   CudaDims dim = CudaOneDim(out->size);
@@ -369,6 +377,14 @@ void EwiseExp(const CudaArray& a, CudaArray* out) {
 void EwiseTanh(const CudaArray& a, CudaArray* out) {
   CudaDims dim = CudaOneDim(out->size);
   EwiseTanhKernel<<<dim.grid, dim.block>>>(a.ptr, out->ptr, out->size);
+}
+void EwiseCos(const CudaArray& a, CudaArray* out) {
+  CudaDims dim = CudaOneDim(out->size);
+  EwiseCosKernel<<<dim.grid, dim.block>>>(a.ptr, out->ptr, out->size);
+}
+void EwiseSin(const CudaArray& a, CudaArray* out) {
+  CudaDims dim = CudaOneDim(out->size);
+  EwiseSinKernel<<<dim.grid, dim.block>>>(a.ptr, out->ptr, out->size);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -551,6 +567,7 @@ PYBIND11_MODULE(ndarray_backend_cuda, m) {
   m.def("ewise_div", EwiseDiv);
   m.def("scalar_div", ScalarDiv);
   m.def("scalar_power", ScalarPower);
+  m.def("ewise_pow", EwisePow);
 
   m.def("ewise_maximum", EwiseMaximum);
   m.def("scalar_maximum", ScalarMaximum);
@@ -562,6 +579,8 @@ PYBIND11_MODULE(ndarray_backend_cuda, m) {
   m.def("ewise_log", EwiseLog);
   m.def("ewise_exp", EwiseExp);
   m.def("ewise_tanh", EwiseTanh);
+  m.def("ewise_cos", EwiseCos);
+  m.def("ewise_sin", EwiseSin);
 
   m.def("matmul", Matmul);
 

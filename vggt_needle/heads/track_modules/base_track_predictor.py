@@ -89,6 +89,8 @@ class BaseTrackerPredictor(nn.Module):
         # apply a layernorm to fmaps here
         fmaps = self.fmap_norm(fmaps.permute((0, 1, 3, 4, 2)))
         fmaps = fmaps.permute((0, 1, 4, 2, 3))
+        
+        device = fmaps.device
 
         # Scale the input query_points because we may downsample the images
         # by down_ratio or self.stride
@@ -107,7 +109,7 @@ class BaseTrackerPredictor(nn.Module):
         query_track_feat = sample_features4d(torch.from_numpy(fmaps.numpy())[:, 0], torch.from_numpy(coords.numpy())[:, 0])
 
         # init track feats by query feats
-        track_feats = Tensor(query_track_feat.unsqueeze(1).repeat(1, S, 1, 1).numpy())  # B, S, N, C
+        track_feats = Tensor(query_track_feat.unsqueeze(1).repeat(1, S, 1, 1).numpy(), device=device)  # B, S, N, C
         # back up the init coords
         coords_backup = coords.detach() + 0.0
 
@@ -130,7 +132,7 @@ class BaseTrackerPredictor(nn.Module):
             # Movement of current coords relative to query points
             flows = ((coords - coords[:, 0:1, :, :].broadcast_to(coords.shape)).permute((0, 2, 1, 3))+0.0).reshape((B * N, S, 2))
 
-            flows_emb = Tensor(get_2d_embedding(torch.from_numpy(flows.numpy()), self.flows_emb_dim, cat_coords=False).numpy())
+            flows_emb = Tensor(get_2d_embedding(torch.from_numpy(flows.numpy()), self.flows_emb_dim, cat_coords=False).numpy(), device=device)
 
             # (In my trials, it is also okay to just add the flows_emb instead of concat)
             flows_emb = ops.cat([flows_emb, flows / self.max_scale, flows / self.max_scale], dim=-1)
@@ -147,7 +149,7 @@ class BaseTrackerPredictor(nn.Module):
 
             sampled_pos_emb = sampled_pos_emb.reshape(-1, sampled_pos_emb.shape[-1]).unsqueeze(1)
  
-            x = transformer_input + Tensor(sampled_pos_emb.numpy()).broadcast_to(transformer_input.shape)
+            x = transformer_input + Tensor(sampled_pos_emb.numpy(), device = device).broadcast_to(transformer_input.shape)
 
             # Add the query ref token to the track feats
             query_ref_token = ops.cat(

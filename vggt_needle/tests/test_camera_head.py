@@ -21,6 +21,9 @@ from vggt_needle.needle import Tensor, init
 
 from vggt_needle.heads.camera_head import CameraHead
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def make_dummy_aggregated_tokens_list(
     B: int,
@@ -41,7 +44,7 @@ def make_dummy_aggregated_tokens_list(
     tokens_list = []
     for _ in range(num_blocks):
         x = init.randn(B, S, P, dim_in)
-        tokens_list.append(x)
+        tokens_list.append(x.to(device))
     return tokens_list
 
 
@@ -74,7 +77,7 @@ def test_camera_head_once(
         trans_act=trans_act,
         quat_act=quat_act,
         fl_act=fl_act,
-    )
+    ).to(device)
 
     # Fake aggregator outputs
     aggregated_tokens_list = make_dummy_aggregated_tokens_list(

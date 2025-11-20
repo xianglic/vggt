@@ -12,6 +12,9 @@ from vggt_needle.needle import ops
 
 from vggt_needle.needle.nn import ConvTranspose2d  
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 # ------ Helpers ------
 
@@ -38,15 +41,15 @@ def copy_torch_weights_to_needle(conv_pt: torch.nn.ConvTranspose2d,
     # permute to Needle layout: (K, K, C_out, C_in)
     # w_ndl = np.transpose(w_pt, (2, 3, 1, 0))         # (K, K, C_out, C_in)
 
-    conv_ndl.weight.data = Tensor(w_pt.copy())
+    conv_ndl.weight.data = Tensor(w_pt.copy()).to(device)
     if b_pt is not None and conv_ndl.bias is not None:
-        conv_ndl.bias.data = Tensor(b_pt.copy())
+        conv_ndl.bias.data = Tensor(b_pt.copy()).to(device)
 
 
 def run_single_case(
     N, C_in, C_out, H, W,
     kernel_size, stride, padding, output_padding=0,
-    device="cpu"
+    torch_device="cpu"
 ):
     print(f"  Case: N={N}, C_in={C_in}, C_out={C_out}, "
           f"H={H}, W={W}, K={kernel_size}, s={stride}, p={padding}, op={output_padding}")
@@ -62,7 +65,7 @@ def run_single_case(
         stride=stride,
         padding=padding,
         bias=True,
-        device=device,
+        device=torch_device,
         dtype=torch.float32,
     )
 
@@ -74,7 +77,7 @@ def run_single_case(
         stride=stride,
         padding=padding,
         bias=True,
-        device=device,
+        device=torch_device,
         dtype="float32",
     )
 
@@ -82,9 +85,9 @@ def run_single_case(
     copy_torch_weights_to_needle(conv_pt, conv_ndl)
 
     # ----- Input -----
-    x_pt = torch.randn(N, C_in, H, W, device=device, dtype=torch.float32, requires_grad=True)
+    x_pt = torch.randn(N, C_in, H, W, device=torch_device, dtype=torch.float32, requires_grad=True)
     x_np = x_pt.detach().cpu().numpy()
-    x_ndl = Tensor(x_np, dtype="float32")
+    x_ndl = Tensor(x_np, dtype="float32").to(device)
     x_ndl.requires_grad = True
 
     # ----- Forward -----
@@ -114,6 +117,7 @@ def test_conv_transpose2d():
     ]
 
     for cfg in cases:
+        # run_single_case(*cfg)
         run_single_case(*cfg)
 
     print("\nAll ConvTranspose2d tests passed ✅")
