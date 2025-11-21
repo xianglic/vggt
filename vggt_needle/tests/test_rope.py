@@ -10,6 +10,9 @@ import torch
 from vggt_needle.layers.rope import RotaryPositionEmbedding2D as NeedleRoPE
 
 from vggt_needle.needle import Tensor
+from vggt_needle.needle import backend_ndarray as nd
+DEVICE = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(DEVICE)
 
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #
@@ -213,6 +216,7 @@ def main():
     D = 64         # feature dim, must be divisible by 4
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"torch device: {device}")
     dtype = torch.float32
 
     # -------------------------
@@ -242,8 +246,8 @@ def main():
     # -------------------------
     # Needle inputs
     # -------------------------
-    tokens_needle = Tensor(tokens_np)        # backend will decide device
-    positions_needle = Tensor(positions_np)  # dtype can be int or float; we only use as indices/numbers
+    tokens_needle = Tensor(tokens_np).to(DEVICE)        # backend will decide device
+    positions_needle = Tensor(positions_np).to(DEVICE)  # dtype can be int or float; we only use as indices/numbers
 
     # -------------------------
     # Instantiate RoPE modules
@@ -252,7 +256,7 @@ def main():
     scaling_factor = 1.0
 
     rope_torch = RotaryPositionEmbedding2D(frequency=base_frequency, scaling_factor=scaling_factor).to(device=device, dtype=dtype)
-    rope_needle = NeedleRoPE(frequency=base_frequency, scaling_factor=scaling_factor)
+    rope_needle = NeedleRoPE(frequency=base_frequency, scaling_factor=scaling_factor).to(device)
 
     # -------------------------
     # Forward pass

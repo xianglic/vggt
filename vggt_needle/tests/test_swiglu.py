@@ -8,7 +8,9 @@ import numpy as np
 
 from vggt_needle.needle import Tensor, nn
 from vggt_needle.layers.swiglu_ffn import SwiGLU
-
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def test_mlp_forward():
     np.random.seed(0)
@@ -24,10 +26,10 @@ def test_mlp_forward():
         hidden_features=D_hidden,
         out_features=D_out,
         bias=True,
-    )
+    ).to(device)
 
     x_np = np.random.randn(B, D_in).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     # Needle forward
     y = mlp(x).numpy()

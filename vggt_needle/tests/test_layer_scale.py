@@ -9,6 +9,10 @@ import numpy as np
 from vggt_needle.needle import Tensor
 from vggt_needle.needle import nn
 from vggt_needle.layers.layer_scale import LayerScale
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
+
 
 
 
@@ -24,13 +28,13 @@ if __name__ == "__main__":
     # ---------------------------
     # Build module
     # ---------------------------
-    ls = LayerScale(dim=C, init_values=init_value)
+    ls = LayerScale(dim=C, init_values=init_value).to(device)
 
     # ---------------------------
     # Make test input
     # ---------------------------
     x_np = np.random.randn(B, N, C).astype("float32")
-    x = Tensor(x_np, requires_grad=True)
+    x = Tensor(x_np, requires_grad=True).to(device)
 
     # ---------------------------
     # Forward

@@ -6,6 +6,9 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from vggt_needle.needle import Tensor
 from vggt_needle.needle import nn
 from vggt_needle.layers.patch_embed import *
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 if __name__ == "__main__":
     import numpy as np
@@ -82,23 +85,23 @@ if __name__ == "__main__":
             embed_dim=embed_dim,
             norm_layer=norm_layer,
             flatten_embedding=flatten_embedding,
-        )
+        ).to(device)
 
         # Copy conv weights: Torch (O, I, H, W) -> Needle Conv expects HWIO
         w_torch = torch_pe.proj.weight.detach().cpu().numpy()        # (O, I, H, W)
         w_hwio = np.transpose(w_torch, (2, 3, 1, 0))                 # (H, W, I, O)
-        needle_pe.proj.weight.data = Tensor(w_hwio.astype("float32"))
+        needle_pe.proj.weight.data = Tensor(w_hwio.astype("float32")).to(device)
 
         if torch_pe.proj.bias is not None and needle_pe.proj.bias is not None:
             b_torch = torch_pe.proj.bias.detach().cpu().numpy()      # (O,)
-            needle_pe.proj.bias.data = Tensor(b_torch.astype("float32"))
+            needle_pe.proj.bias.data = Tensor(b_torch.astype("float32")).to(device)
 
         # Copy norm weights if present
         if use_norm:
             gamma_torch = torch_pe.norm.weight.detach().cpu().numpy()  # (D,)
             beta_torch = torch_pe.norm.bias.detach().cpu().numpy()     # (D,)
-            needle_pe.norm.weight.data = Tensor(gamma_torch.astype("float32"))
-            needle_pe.norm.bias.data = Tensor(beta_torch.astype("float32"))
+            needle_pe.norm.weight.data = Tensor(gamma_torch.astype("float32")).to(device)
+            needle_pe.norm.bias.data = Tensor(beta_torch.astype("float32")).to(device)
 
         return torch_pe, needle_pe
 
@@ -133,7 +136,7 @@ if __name__ == "__main__":
         np.random.seed(0)
         x_np = np.random.randn(B, C, H, W).astype("float32")
         x_torch = torch.tensor(x_np)
-        x_needle = Tensor(x_np)
+        x_needle = Tensor(x_np).to(device)
 
         # Forward
         y_torch = torch_pe(x_torch).detach().cpu().numpy()

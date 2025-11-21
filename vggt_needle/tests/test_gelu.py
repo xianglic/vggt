@@ -10,6 +10,9 @@ import torch
 from vggt_needle.needle import Tensor
 from vggt_needle.needle import nn
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def test_gelu_forward():
     np.random.seed(0)
@@ -19,13 +22,13 @@ def test_gelu_forward():
     x_np = np.random.randn(4, 7).astype("float32")
 
     # needle tensor
-    x_needle = Tensor(x_np, requires_grad=False)
+    x_needle = Tensor(x_np, requires_grad=False).to(device)
 
     # torch tensor
     x_torch = torch.tensor(x_np, requires_grad=False)
 
-    gelu_needle = nn.GELU()
-    gelu_torch = torch.nn.GELU()
+    gelu_needle = nn.GELU().to(device)
+    gelu_torch = torch.nn.GELU(approximate="tanh")
 
     y_needle = gelu_needle(x_needle).numpy()
     y_torch = gelu_torch(x_torch).detach().cpu().numpy()

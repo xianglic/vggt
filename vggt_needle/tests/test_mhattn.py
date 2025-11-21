@@ -10,6 +10,9 @@ import torch
 # e.g. from vggt_needle.needle.nn import MultiheadAttention
 from vggt_needle.needle import Tensor
 from vggt_needle.needle.nn import MultiheadAttention
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 
 def copy_torch_mha_to_needle(torch_mha: torch.nn.MultiheadAttention,
@@ -40,11 +43,11 @@ def copy_torch_mha_to_needle(torch_mha: torch.nn.MultiheadAttention,
         # Needle Linear: weight (in_features, out_features), forward: X @ W
         # PyTorch Linear: weight (out_features, in_features), forward: X @ W^T
         # => needle_weight = torch_weight.T
-        needle_mha.in_proj_weight = Tensor(in_w.astype("float32"))
+        needle_mha.in_proj_weight = Tensor(in_w.astype("float32")).to(device)
         # needle_mha.k_proj.weight = Tensor(k_w_torch.astype("float32"))
         # needle_mha.v_proj.weight = Tensor(v_w_torch.astype("float32"))
 
-        needle_mha.in_proj_bias = Tensor(in_b.astype("float32"))
+        needle_mha.in_proj_bias = Tensor(in_b.astype("float32")).to(device)
         # needle_mha.k_proj.bias = Tensor(k_b_torch.astype("float32"))
         # needle_mha.v_proj.bias = Tensor(v_b_torch.astype("float32"))
 
@@ -52,8 +55,8 @@ def copy_torch_mha_to_needle(torch_mha: torch.nn.MultiheadAttention,
         out_w = torch_mha.out_proj.weight.detach().cpu().numpy()  # (E, E)
         out_b = torch_mha.out_proj.bias.detach().cpu().numpy()    # (E,)
 
-        needle_mha.out_proj.weight = Tensor(out_w.astype("float32"))
-        needle_mha.out_proj.bias = Tensor(out_b.astype("float32"))
+        needle_mha.out_proj.weight = Tensor(out_w.astype("float32")).to(device)
+        needle_mha.out_proj.bias = Tensor(out_b.astype("float32")).to(device)
 
 
 def needle_to_numpy(x: Tensor) -> np.ndarray:
@@ -80,7 +83,7 @@ def run_single_test(embed_dim=32, num_heads=4, B=2, T_q=5, T_k=7):
         bias=True,
         batch_first=True,
         dtype="float32",
-    )
+    ).to(device)
 
     # Copy parameters from torch -> needle
     copy_torch_mha_to_needle(torch_mha, needle_mha)
@@ -91,9 +94,9 @@ def run_single_test(embed_dim=32, num_heads=4, B=2, T_q=5, T_k=7):
     k_t = torch.randn(B, T_k, embed_dim, dtype=torch.float32)
     v_t = torch.randn(B, T_k, embed_dim, dtype=torch.float32)
 
-    q_n = Tensor(q_t.detach().cpu().numpy())
-    k_n = Tensor(k_t.detach().cpu().numpy())
-    v_n = Tensor(v_t.detach().cpu().numpy())
+    q_n = Tensor(q_t.detach().cpu().numpy()).to(device)
+    k_n = Tensor(k_t.detach().cpu().numpy()).to(device)
+    v_n = Tensor(v_t.detach().cpu().numpy()).to(device)
 
     # ----- Forward: PyTorch -----
     # average_attn_weights=False to get per-head weights
@@ -158,11 +161,11 @@ def test_self_attention():
         bias=True,
         batch_first=True,
         dtype="float32",
-    )
+    ).to(device)
     copy_torch_mha_to_needle(torch_mha, needle_mha)
 
     x_t = torch.randn(B, T, embed_dim, dtype=torch.float32)
-    x_n = Tensor(x_t.detach().cpu().numpy())
+    x_n = Tensor(x_t.detach().cpu().numpy()).to(device)
 
     out_t, attn_t = torch_mha(
         x_t, x_t, x_t,

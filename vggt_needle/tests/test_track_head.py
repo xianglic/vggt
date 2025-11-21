@@ -13,7 +13,9 @@ from vggt_needle.needle import Tensor
 from vggt_needle.heads.track_head import TrackHead
 from vggt_needle.heads.dpt_head import DPTHead   # ensures module loads
 from vggt_needle.heads.track_modules.base_track_predictor import BaseTrackerPredictor
-
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def test_track_head_forward():
     print("Testing TrackHead forward pass...")
@@ -39,17 +41,17 @@ def test_track_head_forward():
     aggregated_tokens_list = []
     for _ in range(num_layers):
         arr = np.random.randn(B, S, num_patch_tokens, dim_in).astype("float32")
-        aggregated_tokens_list.append(Tensor(arr))
+        aggregated_tokens_list.append(Tensor(arr).to(device))
 
     # ---------------------------------------------------------
     # Dummy images
     images_np = np.random.randn(B, S, C, H, W).astype("float32")
-    images = Tensor(images_np)
+    images = Tensor(images_np).to(device)
 
     # ---------------------------------------------------------
     # Dummy query points (B, N, 2)
     query_np = np.random.uniform(low=0, high=min(H, W), size=(B, N, 2)).astype("float32")
-    query_points = Tensor(query_np)
+    query_points = Tensor(query_np).to(device)
 
     # ---------------------------------------------------------
     # Build TrackHead
@@ -63,7 +65,7 @@ def test_track_head_forward():
         corr_levels=3,
         corr_radius=2,
         hidden_size=128,
-    )
+    ).to(device)
 
     # ---------------------------------------------------------
     # Forward Pass

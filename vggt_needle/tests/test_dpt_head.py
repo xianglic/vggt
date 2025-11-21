@@ -10,6 +10,10 @@ from vggt_needle.needle import Tensor
 
 from vggt_needle.heads.dpt_head import DPTHead
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+device = nd.cpu()
+print(device)
 
 def make_dummy_inputs(
     B: int = 2,
@@ -27,7 +31,7 @@ def make_dummy_inputs(
     """
     # Images: [B, S, 3, H, W]
     images_np = np.random.randn(B, S, 3, H, W).astype("float32")
-    images = Tensor(images_np)
+    images = Tensor(images_np).to(device)
 
     # Token grid dimensions
     patch_h, patch_w = H // patch_size, W // patch_size
@@ -40,7 +44,7 @@ def make_dummy_inputs(
     for _ in range(max_layer_idx + 1):
         # Shape: [B, S, num_tokens_total, dim_in]
         tokens_np = np.random.randn(B, S, num_tokens_total, dim_in).astype("float32")
-        aggregated_tokens_list.append(Tensor(tokens_np))
+        aggregated_tokens_list.append(Tensor(tokens_np).to(device))
 
     return aggregated_tokens_list, images, patch_start_idx, (patch_h, patch_w)
 
@@ -72,7 +76,7 @@ def test_dpt_head_forward_pred_conf():
         feature_only=False,
         pos_embed=True,
         down_ratio=1,
-    )
+    ).to(device)
 
     # frames_chunk_size defaults to 8; since S=4 <= 8, it will process all frames at once (no chunking)
     preds, conf = head(aggregated_tokens_list, images, patch_start_idx)
@@ -123,7 +127,7 @@ def test_dpt_head_forward_feature_only():
         features=features,
         pos_embed=True,
         down_ratio=1,
-    )
+    ).to(device)
 
     feats = head(aggregated_tokens_list, images, patch_start_idx)
 

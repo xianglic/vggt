@@ -478,4 +478,4 @@ def custom_interpolate(
         x = ops.cat(interpolated_chunks, dim=0)
         return x+0.0
     else:
-        return Tensor(torch.nn.functional.interpolate(torch.from_numpy(x.numpy()), size=size, mode=mode, align_corners=align_corners).numpy())
+        return Tensor(torch.nn.functional.interpolate(torch.from_numpy(x.numpy()), size=size, mode=mode, align_corners=align_corners).numpy()).to(x.device)

@@ -5,11 +5,15 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 from vggt_needle.needle import nn as nn_custom
+from vggt_needle.needle import Tensor
 from torch import nn as nn_torch
 
 import torch
-import vggt_needle.needle
 import numpy as np
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
+
 
 
 def compare_layernorms(shape, dim, eps=1e-5, atol=1e-6, rtol=1e-6):
@@ -18,17 +22,17 @@ def compare_layernorms(shape, dim, eps=1e-5, atol=1e-6, rtol=1e-6):
     x_np = np.random.randn(*shape)
     # random input
     x_ref = torch.from_numpy(x_np).float()
-    x_my  = needle.Tensor(x_np)
+    x_my  = Tensor(x_np).to(device)
     # reference LayerNorm
     ln_ref = nn_torch.LayerNorm(normalized_shape=dim, eps=eps, elementwise_affine=True)
 
     # our custom LayerNorm with same hyperparams
-    ln_my = nn_custom.LayerNorm(dim=dim, eps=eps)
+    ln_my = nn_custom.LayerNorm(dim=dim, eps=eps).to(device)
 
     # copy parameters so they start identical
     with torch.no_grad():
-        ln_my.weight.data = needle.Tensor(ln_ref.weight.cpu().numpy()) 
-        ln_my.bias.data = needle.Tensor(ln_ref.bias.cpu().numpy())
+        ln_my.weight.data = Tensor(ln_ref.weight.cpu().numpy()).to(device)
+        ln_my.bias.data = Tensor(ln_ref.bias.cpu().numpy()).to(device)
 
     # forward
     y_ref = ln_ref(x_ref)
@@ -50,7 +54,7 @@ def compare_linears(shape, out_features, bias=True, atol=1e-6, rtol=1e-6):
 
     # random input
     x_ref = torch.from_numpy(x_np).float()
-    x_my  = needle.Tensor(x_np)
+    x_my  = Tensor(x_np).to(device)
 
     # reference Linear (PyTorch)
     lin_ref = nn_torch.Linear(in_features, out_features, bias=bias)
@@ -62,11 +66,11 @@ def compare_linears(shape, out_features, bias=True, atol=1e-6, rtol=1e-6):
     with torch.no_grad():
         # weight: (out_features, in_features)
         w_ref = lin_ref.weight.detach().cpu().numpy()
-        lin_my.weight.data = needle.Tensor(w_ref)
+        lin_my.weight.data = Tensor(w_ref).to(device)
 
         if bias:
             b_ref = lin_ref.bias.detach().cpu().numpy()
-            lin_my.bias.data = needle.Tensor(b_ref)
+            lin_my.bias.data = Tensor(b_ref).to(device)
 
     # forward
     y_ref = lin_ref(x_ref)      # torch.Tensor

@@ -11,6 +11,10 @@ import torch.nn as nn_torch
 from vggt_needle.needle import Tensor, ops, init
 from vggt_needle.needle.nn import Conv
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+# device = nd.cpu()
+print(device)
 
 # ---- Test utilities ----
 
@@ -32,7 +36,7 @@ def make_aligned_convs(
         kernel_size=kernel_size,
         stride=stride,
         bias=bias,
-        device=None,
+        device=device,
         dtype="float32",
     )
 
@@ -41,12 +45,12 @@ def make_aligned_convs(
         w_torch = torch_conv.weight.detach().cpu().numpy()  # (O, I, H, W)
         # w_hwio = np.transpose(w_torch, (2, 3, 1, 0))        # (H, W, I, O)
 
-        needle_conv.weight.data = Tensor(w_torch.astype("float32"))
+        needle_conv.weight.data = Tensor(w_torch.astype("float32")).to(device)
 
         if bias and torch_conv.bias is not None:
             b_torch = torch_conv.bias.detach().cpu().numpy()  # (O,)
  
-            needle_conv.bias.data = Tensor(b_torch.astype("float32"))
+            needle_conv.bias.data = Tensor(b_torch.astype("float32")).to(device)
 
     return torch_conv, needle_conv
 
@@ -71,7 +75,7 @@ def run_single_case(
     x_np = np.random.randn(B, C_in, H, W).astype("float32")
 
     x_torch = torch.tensor(x_np, requires_grad=True)
-    x_needle = Tensor(x_np, requires_grad=True)
+    x_needle = Tensor(x_np, requires_grad=True).to(device)
 
     # Forward
     y_torch = torch_conv(x_torch)

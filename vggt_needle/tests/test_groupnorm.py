@@ -12,6 +12,10 @@ import torch
 from vggt_needle.needle import Tensor
 from vggt_needle.needle.nn import GroupNorm
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
+
 
 def copy_torch_groupnorm_to_needle(torch_gn: torch.nn.GroupNorm, needle_gn: GroupNorm):
     """
@@ -26,8 +30,8 @@ def copy_torch_groupnorm_to_needle(torch_gn: torch.nn.GroupNorm, needle_gn: Grou
         w = torch_gn.weight.detach().cpu().numpy()  # (C,)
         b = torch_gn.bias.detach().cpu().numpy()    # (C,)
 
-    needle_gn.weight = Tensor(w.astype("float32"))
-    needle_gn.bias = Tensor(b.astype("float32"))
+    needle_gn.weight = Tensor(w.astype("float32")).to(device)
+    needle_gn.bias = Tensor(b.astype("float32")).to(device)
 
 
 def needle_to_numpy(x: Tensor) -> np.ndarray:
@@ -68,7 +72,7 @@ def run_single_groupnorm_test(
         eps=eps,
         affine=affine,
         dtype="float32",
-    )
+    ).to(device)
 
     # Copy parameters
     copy_torch_groupnorm_to_needle(torch_gn, needle_gn)
@@ -76,7 +80,7 @@ def run_single_groupnorm_test(
     # ----- Input -----
     x_shape = (N, C, *spatial_shape)
     x_t = torch.randn(*x_shape, dtype=torch.float32)
-    x_n = Tensor(x_t.detach().cpu().numpy())
+    x_n = Tensor(x_t.detach().cpu().numpy()).to(device)
 
     # ----- Forward -----
     y_t = torch_gn(x_t).detach().cpu().numpy()

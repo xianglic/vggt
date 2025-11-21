@@ -11,7 +11,9 @@ from vggt_needle.needle import Tensor
 # 🔧 Adjust this to your actual file path
 # e.g. from vggt_needle.blocks.attn_blocks import Mlp, AttnBlock, CrossAttnBlock
 from vggt_needle.heads.track_modules.modules import Mlp, AttnBlock, CrossAttnBlock
-
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def test_mlp_linear():
     """
@@ -22,7 +24,7 @@ def test_mlp_linear():
     B, T, C = 2, 5, 16
     hidden = 32
     x_np = np.random.randn(B, T, C).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     mlp = Mlp(
         in_features=C,
@@ -30,7 +32,7 @@ def test_mlp_linear():
         out_features=C,
         use_conv=False,
         drop=0.0,
-    )
+    ).to(device)
 
     y = mlp(x)
     y_np = y.numpy()
@@ -48,7 +50,7 @@ def test_mlp_conv():
     N, C, H, W = 2, 16, 8, 8
     hidden = 32
     x_np = np.random.randn(N, C, H, W).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     mlp = Mlp(
         in_features=C,
@@ -56,7 +58,7 @@ def test_mlp_conv():
         out_features=C,
         use_conv=True,
         drop=0.0,
-    )
+    ).to(device)
 
     y = mlp(x)
     y_np = y.numpy()
@@ -73,12 +75,12 @@ def test_attn_block():
     print("Testing AttnBlock...")
     B, T, hidden_size, num_heads = 2, 6, 32, 4
     x_np = np.random.randn(B, T, hidden_size).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     block = AttnBlock(
         hidden_size=hidden_size,
         num_heads=num_heads,
-    )
+    ).to(device)
 
     y = block(x)  # mask=None
     y_np = y.numpy()
@@ -103,14 +105,14 @@ def test_cross_attn_block():
     x_np = np.random.randn(B, T_q, hidden_size).astype("float32")
     ctx_np = np.random.randn(B, T_k, hidden_size).astype("float32")
 
-    x = Tensor(x_np)
-    context = Tensor(ctx_np)
+    x = Tensor(x_np).to(device)
+    context = Tensor(ctx_np).to(device)
 
     block = CrossAttnBlock(
         hidden_size=hidden_size,
         context_dim=hidden_size,
         num_heads=num_heads,
-    )
+    ).to(device)
 
     # mask=None; CrossAttnBlock will call cross_attn(x, context, context, attn_mask=None)
     y = block(x, context, mask=None)

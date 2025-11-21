@@ -30,6 +30,10 @@ from vggt_needle.heads.head_act import (
     activate_head,
 )
 
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
+
 
 # -----------------------------
 # PyTorch reference functions
@@ -137,7 +141,7 @@ def test_inverse_log_transform():
 
     x_np = np.random.randn(4, 5).astype("float32") * 3.0
     x_torch = torch.tensor(x_np, dtype=torch.float32)
-    x_needle = Tensor(x_np)
+    x_needle = Tensor(x_np).to(device)
 
     y_torch = torch_inverse_log_transform(x_torch)
     y_needle = inverse_log_transform(x_needle)
@@ -152,7 +156,7 @@ def test_base_pose_and_activate_pose():
     # shape (..., 8): 3T + 4quat + 1fl
     x_np = np.random.randn(2, 3, 8).astype("float32")
     x_torch = torch.tensor(x_np, dtype=torch.float32)
-    x_needle = Tensor(x_np)
+    x_needle = Tensor(x_np).to(device)
 
     act_types = ["linear", "inv_log", "exp", "relu"]
 
@@ -184,7 +188,7 @@ def test_activate_head():
     B, C, H, W = 2, 4, 5, 6  # C-1=3 for xyz, 1 for conf
     x_np = np.random.randn(B, C, H, W).astype("float32")
     x_torch = torch.tensor(x_np, dtype=torch.float32)
-    x_needle = Tensor(x_np)
+    x_needle = Tensor(x_np).to(device)
 
     activations = ["norm_exp", "norm", "exp", "relu", "inv_log", "linear"]
     conf_acts = ["expp1", "expp0"]

@@ -13,7 +13,9 @@ from vggt_needle.needle import Tensor
 # 🔧 adjust this to your actual file path where EfficientUpdateFormer / CorrBlock live
 # e.g. from vggt_needle.heads.track_modules.update_former import EfficientUpdateFormer, CorrBlock
 from vggt_needle.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
-
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 def test_efficient_update_former_forward(add_space_attn: bool = True):
     """
@@ -36,7 +38,7 @@ def test_efficient_update_former_forward(add_space_attn: bool = True):
 
     # Dummy input
     x_np = np.random.randn(B, N, T, input_dim).astype("float32")
-    x = Tensor(x_np)
+    x = Tensor(x_np).to(device)
 
     model = EfficientUpdateFormer(
         space_depth=2,
@@ -47,7 +49,7 @@ def test_efficient_update_former_forward(add_space_attn: bool = True):
         output_dim=output_dim,
         add_space_attn=add_space_attn,
         num_virtual_tracks=4,  # keep small for test
-    )
+    ).to(device)
 
     flow, aux = model(x, mask=None)
 
@@ -92,7 +94,7 @@ def test_corr_block_forward():
 
     # Dummy feature maps
     fmaps_np = np.random.randn(B, S, C, H, W).astype("float32")
-    fmaps = Tensor(fmaps_np)
+    fmaps = Tensor(fmaps_np).to(device)
 
     corr_block = CorrBlock(
         fmaps=fmaps,
@@ -105,13 +107,13 @@ def test_corr_block_forward():
     # Dummy targets and coords
     # targets: (B, S, N, C) – use same C as fmaps
     targets_np = np.random.randn(B, S, N, C).astype("float32")
-    targets = Tensor(targets_np)
+    targets = Tensor(targets_np).to(device)
 
     # coords: pixel coordinates at full resolution, within [0, H) and [0, W)
     coords_np = np.zeros((B, S, N, 2), dtype="float32")
     coords_np[..., 0] = np.random.uniform(0, H - 1, size=(B, S, N))  # y
     coords_np[..., 1] = np.random.uniform(0, W - 1, size=(B, S, N))  # x
-    coords = Tensor(coords_np)
+    coords = Tensor(coords_np).to(device)
 
     corr = corr_block.corr_sample(targets, coords)
     corr_np = corr.numpy()

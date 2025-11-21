@@ -7,6 +7,10 @@ import numpy as np
 import torch
 
 from vggt_needle.needle import Tensor, ops, init
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
+
 
 # -------------------------------------------------------------------
 # IMPORT YOUR NEEDLE IMPLEMENTATIONS HERE
@@ -126,7 +130,7 @@ def test_linspace():
         (-2.5, 2.5, 10),
     ]
     for start, end, steps in cases:
-        needle_out = needle_linspace(start, end, steps, dtype="float32")
+        needle_out = needle_linspace(start, end, steps, device, dtype="float32")
         torch_out = torch.linspace(start, end, steps=steps, dtype=torch.float32)
 
         needle_np = needle_to_numpy(needle_out)
@@ -147,8 +151,8 @@ def test_meshgrid():
     x = np.linspace(-1.0, 1.0, width).astype("float32")
     y = np.linspace(-0.5, 0.5, height).astype("float32")
 
-    x_n = Tensor(x)
-    y_n = Tensor(y)
+    x_n = Tensor(x).to(device)
+    y_n = Tensor(y).to(device)
     uu_n, vv_n = needle_meshgrid(x_n, y_n, indexing="xy")
 
     x_t = torch.from_numpy(x)
@@ -172,7 +176,7 @@ def test_create_uv_grid():
         aspect_ratio = float(width) / float(height)
 
         torch_uv = torch_create_uv_grid(width, height, aspect_ratio=aspect_ratio, dtype=torch.float32)
-        needle_uv = create_uv_grid(width, height, aspect_ratio=aspect_ratio, dtype="float32")
+        needle_uv = create_uv_grid(width, height, aspect_ratio=aspect_ratio, dtype="float32", device=device)
 
         torch_np = torch_uv.numpy()
         needle_np = needle_to_numpy(needle_uv)
@@ -188,7 +192,7 @@ def test_make_sincos_pos_embed():
     embed_dim = 16
     positions = np.linspace(-1.0, 1.0, 13).astype("float32")
 
-    pos_n = Tensor(positions)
+    pos_n = Tensor(positions).to(device)
     pos_t = torch.from_numpy(positions)
 
     needle_emb = make_sincos_pos_embed(embed_dim, pos_n, omega_0=100.0)
@@ -219,7 +223,7 @@ def test_position_grid_to_embed():
     emb_t = torch_position_grid_to_embed(pos_grid_t, embed_dim, omega_0=100.0)
 
     # Needle embedding (convert pos_grid_t to Needle Tensor)
-    pos_grid_n = Tensor(pos_grid_t.numpy().astype("float32"))
+    pos_grid_n = Tensor(pos_grid_t.numpy().astype("float32")).to(device)
     emb_n = position_grid_to_embed(pos_grid_n, embed_dim, omega_0=100.0)
 
     emb_t_np = emb_t.detach().numpy()
