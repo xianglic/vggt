@@ -9,7 +9,7 @@
 
 from typing import Callable, Optional, Tuple, Union
 
-from vggt_needle.needle import Tensor, nn
+from needle import Tensor, nn
 
 
 def make_2tuple(x):
@@ -67,9 +67,10 @@ class PatchEmbed(nn.Module):
 
         assert H % patch_H == 0, f"Input image height {H} is not a multiple of patch height {patch_H}"
         assert W % patch_W == 0, f"Input image width {W} is not a multiple of patch width: {patch_W}"
-
+        # print(self.proj.weight.sum())
+        # exit()
         x = self.proj(x)+0.0  # B C H W
-
+ 
         H, W = x.shape[2], x.shape[3]
         x = x.reshape((x.shape[0], x.shape[1], -1)).transpose((1, 2))+0.0  # B HW C
         x = self.norm(x)

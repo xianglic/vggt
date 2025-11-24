@@ -10,7 +10,7 @@
 
 from typing import Callable, Optional
 
-from vggt_needle.needle import Tensor, nn
+from needle import Tensor, nn
 
 
 class Mlp(nn.Module):

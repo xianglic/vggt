@@ -15,7 +15,7 @@
 
 
 import numpy as np
-from vggt_needle.needle import nn, Tensor, init, ops
+from needle import nn, Tensor, init, ops
 from typing import Dict, Tuple
 
 

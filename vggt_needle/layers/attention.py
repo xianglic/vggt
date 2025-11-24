@@ -10,8 +10,8 @@
 import logging
 import os
 import warnings
-from vggt_needle.needle import nn
-from vggt_needle.needle import Tensor
+from needle import nn
+from needle import Tensor
 
 class Attention(nn.Module):
     def __init__(

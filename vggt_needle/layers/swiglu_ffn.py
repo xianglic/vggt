@@ -7,7 +7,7 @@ import os
 from typing import Callable, Optional
 import warnings
 
-from vggt_needle.needle import Tensor, nn, ops
+from needle import Tensor, nn, ops
 
 def split_last_dim_in_half(x: Tensor):
     D = x.shape[-1]
