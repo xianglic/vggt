@@ -4,7 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from vggt_needle.needle import nn
+from needle import nn
 from vggt_needle.heads.dpt_head import DPTHead
 from vggt_needle.heads.track_modules.base_track_predictor import BaseTrackerPredictor
 

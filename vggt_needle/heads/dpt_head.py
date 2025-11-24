@@ -11,10 +11,11 @@
 import os
 from typing import List, Dict, Tuple, Union
 
-from vggt_needle.needle import nn, ops, init, Tensor
+from needle import nn, ops, init, Tensor
 from vggt_needle.heads.head_act import activate_head
 from vggt_needle.heads.utils import create_uv_grid, position_grid_to_embed
 
+from utils import print_cuda_mem
 
 class DPTHead(nn.Module):
     """
@@ -106,7 +107,7 @@ class DPTHead(nn.Module):
 
             self.scratch.output_conv2 = nn.Sequential(
                 nn.Conv(conv2_in_channels, head_features_2, kernel_size=3, stride=1, padding=1),
-                nn.ReLU(),
+                nn.ReLU(inplace=True),
                 nn.Conv(head_features_2, output_dim, kernel_size=1, stride=1, padding=0),
             )
 
@@ -199,9 +200,10 @@ class DPTHead(nn.Module):
 
         out = []
         dpt_idx = 0
+       
         for layer_idx in self.intermediate_layer_idx:
             x = aggregated_tokens_list[layer_idx][:, :, patch_start_idx:, :] + 0.0
-
+            
             # Select frames if processing a chunk
             if frames_start_idx is not None and frames_end_idx is not None:
                 x = x[:, frames_start_idx:frames_end_idx, :, :] + 0.0
@@ -211,12 +213,11 @@ class DPTHead(nn.Module):
             x = self.norm(x)
 
             x = (x.permute((0, 2, 1))+0.0).reshape((x.shape[0], x.shape[-1], patch_h, patch_w))
-
             x = self.projects[dpt_idx](x)
             if self.pos_embed:
                 x = self._apply_pos_embed(x, W, H)
             x = self.resize_layers[dpt_idx](x)
-
+            
             out.append(x)
             dpt_idx += 1
 
@@ -235,7 +236,6 @@ class DPTHead(nn.Module):
 
         if self.feature_only:
             return out.reshape((B, S, *out.shape[1:]))
-
         out = self.scratch.output_conv2(out)
         preds, conf = activate_head(out, activation=self.activation, conf_activation=self.conf_activation)
 
@@ -297,7 +297,7 @@ class DPTHead(nn.Module):
 def _make_fusion_block(features: int, size: int = None, has_residual: bool = True, groups: int = 1) -> nn.Module:
     return FeatureFusionBlock(
         features,
-        nn.ReLU(),
+        nn.ReLU(inplace=True),
         deconv=False,
         bn=False,
         expand=False,
@@ -370,7 +370,6 @@ class ResidualConvUnit(nn.Module):
         Returns:
             tensor: output
         """
-
         out = self.activation(x)
         out = self.conv1(out)
         if self.norm1 is not None:
@@ -380,8 +379,8 @@ class ResidualConvUnit(nn.Module):
         out = self.conv2(out)
         if self.norm2 is not None:
             out = self.norm2(out)
-
-        return out + x
+        out = out + x
+        return out
 
 
 class FeatureFusionBlock(nn.Module):
@@ -433,11 +432,9 @@ class FeatureFusionBlock(nn.Module):
             tensor: output
         """
         output = xs[0]
-
         if self.has_residual:
             res = self.resConfUnit1(xs[1])
             output = output + res
-
         output = self.resConfUnit2(output)
 
         if (size is None) and (self.size is None):
@@ -446,7 +443,6 @@ class FeatureFusionBlock(nn.Module):
             modifier = {"size": self.size}
         else:
             modifier = {"size": size}
-
         output = custom_interpolate(output, **modifier, mode="bilinear", align_corners=self.align_corners)
         output = self.out_conv(output)
 
@@ -473,9 +469,10 @@ def custom_interpolate(
     if input_elements > INT_MAX:
         chunks = ops.chunk(x, chunks=(input_elements // INT_MAX) + 1, dim=0)
         interpolated_chunks = [
-            Tensor(torch.nn.functional.interpolate(torch.from_numpy(chunk.numpy())), size=size, mode=mode, align_corners=align_corners) for chunk in chunks
+            Tensor(
+                torch.nn.functional.interpolate(torch.from_numpy(chunk.numpy()).numpy(), size=size, mode=mode, align_corners=align_corners), device=x.device) for chunk in chunks
         ]
         x = ops.cat(interpolated_chunks, dim=0)
         return x+0.0
     else:
-        return Tensor(torch.nn.functional.interpolate(torch.from_numpy(x.numpy()), size=size, mode=mode, align_corners=align_corners).numpy()).to(x.device)
+        return Tensor(torch.nn.functional.interpolate(torch.from_numpy(x.numpy()), size=size, mode=mode, align_corners=align_corners).numpy(),device=x.device)

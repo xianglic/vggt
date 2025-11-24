@@ -7,7 +7,7 @@
 import math
 import numpy as np
 
-from vggt_needle.needle import Tensor, nn, init, ops
+from needle import Tensor, nn, init, ops
 
 from vggt_needle.layers import Mlp
 from vggt_needle.layers.block import Block

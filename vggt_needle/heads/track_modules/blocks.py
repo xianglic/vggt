@@ -8,7 +8,7 @@
 # Modified from https://github.com/facebookresearch/co-tracker/
 
 import math
-from vggt_needle.needle import nn, ops, init, Tensor
+from needle import nn, ops, init, Tensor
 
 from vggt_needle.heads.track_modules.utils import bilinear_sampler
 from vggt_needle.heads.track_modules.modules import AttnBlock, CrossAttnBlock
@@ -192,7 +192,6 @@ class CorrBlock:
             fmap2s = fmaps.reshape((B, S, C, H * W))
             # Choose appropriate target features.
             fmap1 = targets_split[i] if self.multiple_track_feats else targets  # shape: (B, S, N, C)
-
             # Compute correlation directly
             corrs = compute_corr_level(fmap1, fmap2s, C)
             corrs = corrs.reshape((B, S, N, H, W))
@@ -211,7 +210,7 @@ class CorrBlock:
             # We reshape corrs to (B * S * N, 1, H, W) so grid_sample acts over each target.
             corrs_sampled = Tensor(bilinear_sampler(
                 torch.from_numpy(corrs.numpy().reshape(B * S * N, 1, H, W)), torch.from_numpy(coords_lvl.numpy()), padding_mode=self.padding_mode
-            ).numpy(), device=targets.device)
+            ).numpy(), device=corrs.device)
             # The sampled output is (B * S * N, 1, 2r+1, 2r+1). Flatten the last two dims.
             corrs_sampled = corrs_sampled.reshape((B, S, N, -1))  # Now shape: (B, S, N, (2r+1)^2)
             out_pyramid.append(corrs_sampled)

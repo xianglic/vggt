@@ -4,7 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from vggt_needle.needle import nn, ops, init, Tensor
+from needle import nn, ops, init, Tensor
 from vggt_needle.heads.track_modules.blocks import EfficientUpdateFormer, CorrBlock
 from vggt_needle.heads.track_modules.utils import sample_features4d, get_2d_embedding, get_2d_sincos_pos_embed
 from vggt_needle.heads.track_modules.modules import Mlp
@@ -83,14 +83,13 @@ class BaseTrackerPredictor(nn.Module):
         """
         B, N, D = query_points.shape
         B, S, C, HH, WW = fmaps.shape
+        device = query_points.device
 
         assert D == 2, "Input points must be 2D coordinates"
 
         # apply a layernorm to fmaps here
         fmaps = self.fmap_norm(fmaps.permute((0, 1, 3, 4, 2)))
         fmaps = fmaps.permute((0, 1, 4, 2, 3))
-        
-        device = fmaps.device
 
         # Scale the input query_points because we may downsample the images
         # by down_ratio or self.stride
@@ -149,7 +148,7 @@ class BaseTrackerPredictor(nn.Module):
 
             sampled_pos_emb = sampled_pos_emb.reshape(-1, sampled_pos_emb.shape[-1]).unsqueeze(1)
  
-            x = transformer_input + Tensor(sampled_pos_emb.numpy(), device = device).broadcast_to(transformer_input.shape)
+            x = transformer_input + Tensor(sampled_pos_emb.numpy(), device=device).broadcast_to(transformer_input.shape)
 
             # Add the query ref token to the track feats
             query_ref_token = ops.cat(
