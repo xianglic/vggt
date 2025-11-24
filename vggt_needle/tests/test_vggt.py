@@ -11,6 +11,7 @@ from vggt_needle.models.vggt import VGGT
 from vggt_needle.needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
+print("need to be changed")
 
 
 def test_vggt_forward_with_tracking():
