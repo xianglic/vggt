@@ -8,6 +8,9 @@ from vggt_needle.needle import Tensor
 
 # 🔧 Adjust if VGGT lives somewhere else, e.g. vggt.models.vggt_model
 from vggt_needle.models.vggt import VGGT
+from vggt_needle.needle import backend_ndarray as nd
+device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
+print(device)
 
 
 def test_vggt_forward_with_tracking():
@@ -33,7 +36,7 @@ def test_vggt_forward_with_tracking():
     # Dummy images: (B, S, 3, H, W)
     # ------------------------------------------------------------------
     images_np = np.random.rand(B, S, C, H, W).astype("float32")
-    images = Tensor(images_np)
+    images = Tensor(images_np).to(device)
 
     # ------------------------------------------------------------------
     # Dummy query points: (B, N, 2) in pixel coordinates
@@ -41,7 +44,7 @@ def test_vggt_forward_with_tracking():
     query_np = np.zeros((B, N, 2), dtype="float32")
     query_np[..., 0] = np.random.uniform(0, W - 1, size=(B, N))  # x
     query_np[..., 1] = np.random.uniform(0, H - 1, size=(B, N))  # y
-    query_points = Tensor(query_np)
+    query_points = Tensor(query_np).to(device)
 
     # ------------------------------------------------------------------
     # Build model
@@ -54,7 +57,7 @@ def test_vggt_forward_with_tracking():
         enable_point=True,
         enable_depth=True,
         enable_track=True,
-    )
+    ).to(device)
     model.eval()  # so that predictions["images"] is filled
 
     # ------------------------------------------------------------------
@@ -134,7 +137,7 @@ def test_vggt_forward_no_tracking():
     embed_dim = 1024
 
     images_np = np.random.rand(B, S, C, H, W).astype("float32")
-    images = Tensor(images_np)
+    images = Tensor(images_np).to(device)
 
     model = VGGT(
         img_size=img_size,
@@ -144,7 +147,7 @@ def test_vggt_forward_no_tracking():
         enable_point=True,
         enable_depth=True,
         enable_track=True,  # track_head exists but won't be used without query_points
-    )
+    ).to(device)
     model.eval()
 
     preds = model(images, query_points=None)

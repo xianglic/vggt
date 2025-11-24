@@ -12,7 +12,6 @@ from vggt_needle.heads.dpt_head import DPTHead
 
 from vggt_needle.needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
-device = nd.cpu()
 print(device)
 
 def make_dummy_inputs(

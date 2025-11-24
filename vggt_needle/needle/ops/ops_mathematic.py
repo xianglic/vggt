@@ -638,12 +638,26 @@ class Conv(TensorOp):
 
         for i in range(K):
             for j in range(K):
-                A_ij = A_pad[:, i : i + H_out * s : s, j : j + W_out * s : s, :]
-                W_ij = B[i, j, :, :]
-                A_e = A_ij.compact().reshape((N, H_out, W_out, C_in, 1)).broadcast_to((N, H_out, W_out, C_in, C_out))
-                W_e = W_ij.compact().reshape((1, 1, 1, C_in, C_out)).broadcast_to((N, H_out, W_out, C_in, C_out))
-                contrib = (A_e * W_e).sum(axis=3)
+                # A_ij: (N, H_out, W_out, C_in)
+                A_ij = A_pad[:, i : i + H_out * s : s,
+                                j : j + W_out * s : s, :]
 
+                # Flatten batch + spatial dims → (N * H_out * W_out, C_in)
+                A_flat = A_ij.compact().reshape((N * H_out * W_out, C_in))
+
+                # W_ij: (C_in, C_out)
+                W_ij = B[i, j, :, :]
+
+                # 2D matmul using backend '@'
+                # (N * H_out * W_out, C_in) @ (C_in, C_out)
+                contrib_flat = A_flat.compact().reshape(
+                    (N * H_out * W_out, C_in)
+                ) @ W_ij.compact().reshape((C_in, C_out))
+
+                # Reshape back → (N, H_out, W_out, C_out)
+                contrib = contrib_flat.reshape((N, H_out, W_out, C_out))
+
+                # Accumulate into result
                 Y = Y + contrib
 
         return Y.compact()
