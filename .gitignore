@@ -157,3 +157,4 @@ examples/drone/
 .*
 
 !.gitignore
+!.gitattributes
