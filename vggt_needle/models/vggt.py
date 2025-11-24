@@ -10,7 +10,7 @@ from vggt_needle.heads.camera_head import CameraHead
 from vggt_needle.heads.dpt_head import DPTHead
 from vggt_needle.heads.track_head import TrackHead
 
-from utils import print_cuda_mem
+from needle.utils import print_cuda_mem
 
 class VGGT(nn.Module):
     def __init__(self, img_size=518, patch_size=14, embed_dim=1024,

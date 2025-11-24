@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 """
@@ -17,11 +17,11 @@ Checks:
 import argparse
 import numpy as np
 
-from vggt_needle.needle import Tensor, init
+from needle import Tensor, init
 
 from vggt_needle.heads.camera_head import CameraHead
 
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 """
 Simple test script for DinoVisionTransformer / ViT in Needle.
@@ -13,8 +13,8 @@ Usage:
 import argparse
 import math
 
-from vggt_needle.needle import init, ops, Tensor
-from vggt_needle.needle import nn
+from needle import init, ops, Tensor
+from needle import nn
 
 from vggt_needle.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2, DinoVisionTransformer
 

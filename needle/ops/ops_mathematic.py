@@ -14,7 +14,7 @@ import math
 from ..backend_selection import array_api, BACKEND
 from .ops_tuple import *
 
-from utils import print_cuda_mem
+from needle.utils import print_cuda_mem
 
 class EWiseAdd(TensorOp):
     def compute(self, a: NDArray, b: NDArray):

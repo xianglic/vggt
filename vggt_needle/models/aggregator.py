@@ -14,7 +14,7 @@ from vggt_needle.layers.block import Block
 from vggt_needle.layers.rope import RotaryPositionEmbedding2D, PositionGetter
 from vggt_needle.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2
 
-from utils import print_cuda_mem
+from needle.utils import print_cuda_mem
 logger = logging.getLogger(__name__)
 
 _RESNET_MEAN = [0.485, 0.456, 0.406]

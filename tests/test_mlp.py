@@ -2,13 +2,13 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 import numpy as np
 
-from vggt_needle.needle import Tensor, nn
+from needle import Tensor, nn
 from vggt_needle.layers.mlp import Mlp   # <- adjust if this class lives in a different module
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 

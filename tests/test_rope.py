@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 import numpy as np
@@ -9,8 +9,8 @@ import torch
 
 from vggt_needle.layers.rope import RotaryPositionEmbedding2D as NeedleRoPE
 
-from vggt_needle.needle import Tensor
-from vggt_needle.needle import backend_ndarray as nd
+from needle import Tensor
+from needle import backend_ndarray as nd
 DEVICE = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(DEVICE)
 

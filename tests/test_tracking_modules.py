@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 import numpy as np
 
-from vggt_needle.needle import Tensor
+from needle import Tensor
 
 # 🔧 Adjust this to your actual file path
 # e.g. from vggt_needle.blocks.attn_blocks import Mlp, AttnBlock, CrossAttnBlock
 from vggt_needle.heads.track_modules.modules import Mlp, AttnBlock, CrossAttnBlock
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 import numpy as np
 import torch
 
-from vggt_needle.needle import Tensor
+from needle import Tensor
 
 from vggt_needle.heads.track_modules.base_track_predictor import BaseTrackerPredictor
 
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 # device = nd.cpu()
 print(device)

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 import numpy as np
 import torch
 
 # 🔧 Adjust these imports to your project layout:
-# e.g. from vggt_needle.needle.nn import GroupNorm
-from vggt_needle.needle import Tensor
-from vggt_needle.needle.nn import GroupNorm
+# e.g. from needle.nn import GroupNorm
+from needle import Tensor
+from needle.nn import GroupNorm
 
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 

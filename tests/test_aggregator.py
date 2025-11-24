@@ -4,11 +4,11 @@ import sys
 import argparse
 import numpy as np
 
-from vggt_needle.needle import nn, init, Tensor
-from vggt_needle.needle import ops
+from needle import nn, init, Tensor
+from needle import ops
 
 from vggt_needle.models.aggregator import Aggregator
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)

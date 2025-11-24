@@ -15,7 +15,7 @@ from needle import nn, ops, init, Tensor
 from vggt_needle.heads.head_act import activate_head
 from vggt_needle.heads.utils import create_uv_grid, position_grid_to_embed
 
-from utils import print_cuda_mem
+from needle.utils import print_cuda_mem
 
 class DPTHead(nn.Module):
     """

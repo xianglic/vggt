@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 import numpy as np
 import torch
 
-from vggt_needle.needle import Tensor, ops, init
-from vggt_needle.needle import backend_ndarray as nd
+from needle import Tensor, ops, init
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 
@@ -146,7 +146,7 @@ def test_meshgrid():
     print("Testing needle_meshgrid vs torch.meshgrid...")
 
     width, height = 7, 5
-    # You can also generate from vggt_needle.needle_linspace, but it's nice to test
+    # You can also generate from needle_linspace, but it's nice to test
     # against arbitrary coordinates as well.
     x = np.linspace(-1.0, 1.0, width).astype("float32")
     y = np.linspace(-0.5, 0.5, height).astype("float32")

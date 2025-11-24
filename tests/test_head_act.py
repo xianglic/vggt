@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 
 
 """
@@ -20,7 +20,7 @@ We only test the branches that are currently implemented in the Needle code:
 import numpy as np
 import torch
 
-from vggt_needle.needle import Tensor, ops, init
+from needle import Tensor, ops, init
 
 
 from vggt_needle.heads.head_act import (
@@ -30,7 +30,7 @@ from vggt_needle.heads.head_act import (
     activate_head,
 )
 
-from vggt_needle.needle import backend_ndarray as nd
+from needle import backend_ndarray as nd
 device = nd.cuda() if nd.cuda().enabled() else nd.cpu()
 print(device)
 

@@ -15,7 +15,7 @@ from typing import Sequence, Tuple, Union, Callable
 from needle import nn, Tensor, init, ops
 from vggt_needle.layers import Mlp, PatchEmbed, SwiGLUFFNFused, Block
 import torch
-from utils import print_cuda_mem
+from needle.utils import print_cuda_mem
 logger = logging.getLogger("dinov2")
 
 
