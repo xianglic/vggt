@@ -4,12 +4,13 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from vggt_needle.needle import nn, ops, Tensor, init
+from needle import nn, ops, Tensor, init
 from vggt_needle.models.aggregator import Aggregator
 from vggt_needle.heads.camera_head import CameraHead
 from vggt_needle.heads.dpt_head import DPTHead
 from vggt_needle.heads.track_head import TrackHead
 
+from utils import print_cuda_mem
 
 class VGGT(nn.Module):
     def __init__(self, img_size=518, patch_size=14, embed_dim=1024,
@@ -51,26 +52,26 @@ class VGGT(nn.Module):
         # If without batch dimension, add it
         if len(images.shape) == 4:
             images = images.reshape(1, *images.shape)
-            
+       
         if query_points is not None and len(query_points.shape) == 2:
             query_points = query_points.reshape(1, *query_points.shape)
-
         aggregated_tokens_list, patch_start_idx = self.aggregator(images)
-
+        # print([x.sum() for x in aggregated_tokens_list])
+        # exit()
         predictions = {}
 
         if self.camera_head is not None:
             pose_enc_list = self.camera_head(aggregated_tokens_list)
             predictions["pose_enc"] = pose_enc_list[-1]  # pose encoding of the last iteration
             predictions["pose_enc_list"] = pose_enc_list
-            
+  
         if self.depth_head is not None:
             depth, depth_conf = self.depth_head(
                 aggregated_tokens_list, images=images, patch_start_idx=patch_start_idx
             )
             predictions["depth"] = depth
             predictions["depth_conf"] = depth_conf
-
+        
         if self.point_head is not None:
             pts3d, pts3d_conf = self.point_head(
                 aggregated_tokens_list, images=images, patch_start_idx=patch_start_idx

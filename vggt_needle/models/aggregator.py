@@ -6,7 +6,7 @@
 
 import logging
 import numpy as np
-from vggt_needle.needle import nn, init, Tensor, ops
+from needle import nn, init, Tensor, ops
 from typing import Optional, Tuple, Union, List, Dict, Any
 
 from vggt_needle.layers import PatchEmbed
@@ -14,6 +14,7 @@ from vggt_needle.layers.block import Block
 from vggt_needle.layers.rope import RotaryPositionEmbedding2D, PositionGetter
 from vggt_needle.layers.vision_transformer import vit_small, vit_base, vit_large, vit_giant2
 
+from utils import print_cuda_mem
 logger = logging.getLogger(__name__)
 
 _RESNET_MEAN = [0.485, 0.456, 0.406]
@@ -129,7 +130,7 @@ class Aggregator(nn.Module):
         self.patch_start_idx = 1 + num_register_tokens
 
         # Register normalization constants as buffers
-        for name, value in (("resnet_mean", _RESNET_MEAN), ("resnet_std", _RESNET_STD)):
+        for name, value in (("_resnet_mean", _RESNET_MEAN), ("_resnet_std", _RESNET_STD)):
             self.register_buffer(name, Tensor(np.array(value).reshape(1, 1, 3, 1, 1)))
 
         self.use_reentrant = False # hardcoded to False
@@ -192,12 +193,13 @@ class Aggregator(nn.Module):
             raise ValueError(f"Expected 3 input channels, got {C_in}")
 
         # Normalize images and reshape for patch embed
-        images = (images - self.resnet_mean.broadcast_to(images.shape)) / self.resnet_std.broadcast_to(images.shape)
+        images = (images - self._resnet_mean.broadcast_to(images.shape)) / self._resnet_std.broadcast_to(images.shape)
 
         # Reshape to [B*S, C, H, W] for patch embedding
         images = images.reshape((B * S, C_in, H, W))
-        patch_tokens = self.patch_embed(images)
 
+        patch_tokens = self.patch_embed(images)
+        
         if isinstance(patch_tokens, dict):
             patch_tokens = patch_tokens["x_norm_patchtokens"]
 
