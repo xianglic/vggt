@@ -1,12 +1,13 @@
 """The module.
 """
 from typing import List, Callable, Any
-from vggt_needle.needle.autograd import Tensor
-from vggt_needle.needle import ops
-import vggt_needle.needle.init as init
+from needle.autograd import Tensor
+from needle import ops
+import needle.init as init
 import numpy as np
 from .nn_basic import Parameter, Module
 
+from utils import print_cuda_mem
 
 class Conv(Module):
     """

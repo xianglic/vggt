@@ -1,5 +1,5 @@
 """Optimization module"""
-import vggt_needle.needle as ndl
+import needle as ndl
 import numpy as np
 
 

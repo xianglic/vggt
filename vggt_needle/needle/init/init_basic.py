@@ -1,5 +1,5 @@
 import math
-import vggt_needle.needle as ndl
+import needle as ndl
 
 
 def rand(*shape, low=0.0, high=1.0, device=None, dtype="float32", requires_grad=False):

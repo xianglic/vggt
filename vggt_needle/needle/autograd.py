@@ -1,11 +1,11 @@
 """Core data structures."""
-import vggt_needle.needle as needle
+import needle
 from .backend_numpy import Device, all_devices
 from typing import List, Optional, NamedTuple, Tuple, Union, Dict
 from collections import namedtuple
 import numpy
 
-from vggt_needle.needle import init
+from needle import init
 
 # needle version
 LAZY_MODE = False
@@ -14,8 +14,8 @@ TENSOR_COUNTER = 0
 # NOTE: we will import numpy as the array_api
 # as the backend for our computations, this line will change in later homeworks
 
-import numpy as array_api
-NDArray = numpy.ndarray
+# import numpy as array_api
+# NDArray = numpy.ndarray
 
 from .backend_selection import array_api, NDArray, default_device, cpu
 
@@ -200,7 +200,7 @@ class Tensor(Value):
         *,
         device: Optional[Device] = None,
         dtype=None,
-        requires_grad=True,
+        requires_grad=False,
         **kwargs
     ):
         if isinstance(array, Tensor):
@@ -225,22 +225,7 @@ class Tensor(Value):
             cached_data=cached_data,
             requires_grad=requires_grad,
         )
-        
-    def to(self, device) -> "Tensor":
-        data = self.realize_cached_data()
 
-        if hasattr(data, "device") and data.device == device:
-            return self
-
-        if hasattr(data, "to"):
-            new_nd = data.to(device)
-        else:
-            new_nd = Tensor._array_from_numpy(
-                numpy.array(data), device=device, dtype=self.dtype
-            )
-
-        return Tensor.make_const(new_nd, requires_grad=self.requires_grad)
-            
     @staticmethod
     def _array_from_numpy(numpy_array, device, dtype):
         if array_api is numpy:
@@ -306,6 +291,58 @@ class Tensor(Value):
         if array_api is numpy:
             return cpu()
         return data.device
+
+    def to(self, device=None, dtype=None):
+        """
+        Return a new Tensor on the given device.
+
+        - For numpy backend (array_api is numpy): `device` is ignored, only dtype is used.
+        - For NDArray backend: `device` must be a BackendDevice (e.g. cpu(), cuda()).
+          Dtype is always float32, so we ignore non-None dtypes (or assert).
+        """
+        data = self.realize_cached_data()
+
+        # Case 1: pure numpy backend (CPU only)
+        if array_api is numpy:
+            # nothing to do: no devices; maybe cast dtype if requested
+            if device is None and dtype is None:
+                return self
+
+            np_arr = numpy.array(data, dtype=dtype or data.dtype)
+            return Tensor.make_const(np_arr, requires_grad=self.requires_grad)
+
+        # Case 2: NDArray backend (your NDArray class)
+        # data should be an NDArray here
+        from .backend_ndarray import BackendDevice  # adjust import to your layout if needed
+
+        if dtype not in (None, "float32"):
+            raise NotImplementedError("This backend only supports float32 dtype.")
+
+        # If no device specified, or same device, nothing to change
+        if device is None or device == data.device:
+            return self
+
+        # Here is the important part: use NDArray.to(device) (no kwargs)
+        if isinstance(device, BackendDevice):
+            new_data = data.to(device)
+        else:
+            # If you want to allow strings like "cuda", you can map them:
+            from .backend_ndarray import cpu, cuda, cpu_numpy  # or wherever you define these
+
+            if isinstance(device, str):
+                if device == "cuda":
+                    new_data = data.to(cuda())
+                elif device in ("cpu", "cpu_numpy"):
+                    # pick which one you want as "cpu"
+                    new_data = data.to(cpu_numpy())
+                else:
+                    raise ValueError(f"Unknown device string: {device}")
+            else:
+                raise TypeError(
+                    f"device must be a BackendDevice or str, got {type(device)}"
+                )
+
+        return Tensor.make_const(new_data, requires_grad=self.requires_grad)
 
     def backward(self, out_grad=None):
         out_grad = (
