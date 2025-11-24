@@ -151,3 +151,9 @@ skyseg.onnx
 # personalized ignore
 examples/drone/
 .gradio/
+
+# ignore the vim artifact
+*~
+.*
+
+!.gitignore
