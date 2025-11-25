@@ -192,8 +192,13 @@ class Aggregator(nn.Module):
         if C_in != 3:
             raise ValueError(f"Expected 3 input channels, got {C_in}")
 
-        # Normalize images and reshape for patch embed
-        images = (images - self._resnet_mean.broadcast_to(images.shape)) / self._resnet_std.broadcast_to(images.shape)
+        # Broadcast mean and std to match images
+        mean = self._resnet_mean.broadcast_to(images.shape)
+        std = self._resnet_std.broadcast_to(images.shape)
+
+        # images = (images - mean) / std  but using Needle ops
+        images = ops.divide(ops.add(images, ops.negate(mean)), std)
+
 
         # Reshape to [B*S, C, H, W] for patch embedding
         images = images.reshape((B * S, C_in, H, W))

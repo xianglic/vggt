@@ -158,3 +158,6 @@ examples/drone/
 
 !.gitignore
 !.gitattributes
+
+*.zip
+input_images_*

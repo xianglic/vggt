@@ -51,10 +51,10 @@ class VGGT(nn.Module):
         """        
         # If without batch dimension, add it
         if len(images.shape) == 4:
-            images = images.reshape(1, *images.shape)
+            images = images.reshape((1, *images.shape))
        
         if query_points is not None and len(query_points.shape) == 2:
-            query_points = query_points.reshape(1, *query_points.shape)
+            query_points = query_points.reshape((1, *query_points.shape))
         aggregated_tokens_list, patch_start_idx = self.aggregator(images)
         # print([x.sum() for x in aggregated_tokens_list])
         # exit()
