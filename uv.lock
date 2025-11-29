@@ -1019,6 +1019,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pymap3d"
+version = "3.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a5/5c/6de7682c8d0d618acfd939425803ce74f02487eea7124f807c79997facc4/pymap3d-3.2.0.tar.gz", hash = "sha256:355e87c559ac681cba34a7fef5bcec3ad791f95336a0fdaf15e0335f48a309a2", size = 50818, upload-time = "2025-07-08T06:20:27.389Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/ce/3714d0d67a83577017b1e7c40193bc1cf768a1de39c4adff750b7d3c1539/pymap3d-3.2.0-py3-none-any.whl", hash = "sha256:fccd44f2f6021a95adec19771c603b8dac104eab120d863c463d76b9bc298669", size = 64845, upload-time = "2025-07-08T06:20:25.603Z" },
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.2.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1561,6 +1570,7 @@ demo = [
     { name = "omegaconf" },
     { name = "onnxruntime" },
     { name = "opencv-python" },
+    { name = "pymap3d" },
     { name = "requests" },
     { name = "scipy" },
     { name = "tqdm" },
@@ -1585,6 +1595,7 @@ requires-dist = [
     { name = "opencv-python", marker = "extra == 'demo'" },
     { name = "pillow" },
     { name = "pybind11", marker = "extra == 'needle'" },
+    { name = "pymap3d", marker = "extra == 'demo'" },
     { name = "requests", marker = "extra == 'demo'" },
     { name = "safetensors" },
     { name = "scipy", marker = "extra == 'demo'" },

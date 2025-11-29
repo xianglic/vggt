@@ -8,22 +8,32 @@ import torch
 # -----------------------------------------------------------------------------
 # VGGT imports (assumes you're running from the repo root OR vggt is on PYTHONPATH)
 # -----------------------------------------------------------------------------
-from vggt.models.vggt import VGGT
+from vggt_needle.models.vggt import VGGT as VGGT_needle
 from vggt.utils.load_fn import load_and_preprocess_images
 from vggt.utils.pose_enc import pose_encoding_to_extri_intri
+from vggt_needle.helper import sd_torch2needle
+import needle
 
 
 # -----------------------------------------------------------------------------
 # Model loading
 # -----------------------------------------------------------------------------
-def load_model(device: str) -> VGGT:
-    print(f"[VGGT] Loading model on device: {device}")
-    model = VGGT()
+def load_model(device: str) -> VGGT_needle:
+    """
+    Load the VGGT_needle model and initialize it with the original PyTorch state dict.
+    `device` is a torch/needle device string, e.g., "cuda".
+    """
     _URL = "https://huggingface.co/facebook/VGGT-1B/resolve/main/model.pt"
-    state = torch.hub.load_state_dict_from_url(_URL)
-    model.load_state_dict(state)
-    model.to(device)
+    vggt_sd = torch.hub.load_state_dict_from_url(
+        _URL, map_location="cpu", model_dir="/data/hf_cache/"
+    )
+    model = VGGT_needle()
+    # Convert torch state dict to Needle-compatible weights
+    sd_torch2needle(model, vggt_sd)
+    # Load any remaining weights in a non-strict fashion
+    model.load_state_dict(vggt_sd, strict=False)
     model.eval()
+    model = model.to(device)
     return model
 
 
@@ -92,34 +102,39 @@ def compute_camera_pose_quat(extrinsic: np.ndarray) -> np.ndarray:
         poses: (N, 7) with columns [x, y, z, qw, qx, qy, qz]
     """
     if extrinsic.ndim != 3 or extrinsic.shape[1] not in (3, 4):
-        raise RuntimeError(f"Unexpected extrinsic shape in pose computation: {extrinsic.shape}")
-
-    N = extrinsic.shape[0]
+        raise RuntimeError(
+            f"Unexpected extrinsic shape in pose computation: {extrinsic.shape}"
+        )
 
     # Handle both (N,3,4) and (N,4,4) by always taking the top 3 rows
-    R_cam = extrinsic[:, :3, :3]      # (N, 3, 3)
-    t_cam = extrinsic[:, :3, 3]       # (N, 3)
+    R_cam = extrinsic[:, :3, :3]  # (N, 3, 3)
+    t_cam = extrinsic[:, :3, 3]   # (N, 3)
 
     # Invert rotation: R_world = R_cam^T
-    R_world = np.transpose(R_cam, (0, 2, 1))   # (N, 3, 3)
+    R_world = np.transpose(R_cam, (0, 2, 1))  # (N, 3, 3)
 
     # Camera center in world coords: C = -R_world @ t_cam
-    C = -np.einsum("nij,nj->ni", R_world, t_cam)   # (N, 3)
+    C = -np.einsum("nij,nj->ni", R_world, t_cam)  # (N, 3)
 
     # Quaternions for R_world
-    q = rotmat_to_quat_batch(R_world)             # (N, 4) [qw, qx, qy, qz]
+    q = rotmat_to_quat_batch(R_world)  # (N, 4) [qw, qx, qy, qz]
 
-    poses = np.concatenate([C, q], axis=-1)       # (N, 7)
+    poses = np.concatenate([C, q], axis=-1)  # (N, 7)
     return poses
 
 
 # -----------------------------------------------------------------------------
-# Main pipeline: images -> VGGT -> poses -> CSV
+# Main pipeline: images -> VGGT (Needle) -> pose_enc (torch) -> poses -> CSV
 # -----------------------------------------------------------------------------
-def main(images_dir: str, output_csv: str):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+def main(images_dir: str, output_csv: str, max_images: int | None):
+    # --- Device selection (torch-side utilities) ---
+    if not torch.cuda.is_available():
+        raise ValueError("CUDA is not available. VGGT_needle currently expects CUDA.")
+
+    device = "cuda"
     print(f"[Device] Using {device}")
 
+    # Load Needle model (weights from original torch checkpoint)
     model = load_model(device)
 
     # Collect images
@@ -134,27 +149,59 @@ def main(images_dir: str, output_csv: str):
 
     print(f"[Data] Found {len(image_paths)} images in: {images_dir}")
 
-    # Load & preprocess
-    images = load_and_preprocess_images(image_paths).to(device)
-    print(f"[Data] Preprocessed image tensor shape: {images.shape}")
+    # --- Optional subsampling to avoid OOM ---
+    if max_images is not None and len(image_paths) > max_images:
+        step = len(image_paths) / float(max_images)
+        indices = [int(i * step) for i in range(max_images)]
+        image_paths = [image_paths[i] for i in indices]
+        print(
+            f"[Data] Subsampled to {len(image_paths)} images (max_images={max_images}) "
+            f"to reduce GPU memory usage."
+        )
+    else:
+        print(f"[Data] Using all {len(image_paths)} images (no subsampling).")
 
-    # Run VGGT
-    with torch.no_grad():
-        if device == "cuda":
-            # FutureWarning is fine; functional behavior is OK
-            dtype = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
-            with torch.cuda.amp.autocast(dtype=dtype):
-                predictions = model(images)
-        else:
-            predictions = model(images.float())
+    # >>> PRINT SELECTED IMAGES <<<
+    print("[Data] Images selected for processing:")
+    for p in image_paths:
+        print("   -", p)
+    print("-" * 60)
 
-    # pose_enc -> extrinsic / intrinsic
-    extrinsic, intrinsic = pose_encoding_to_extri_intri(
-        predictions["pose_enc"],
-        images.shape[-2:],
+    # --- Load & preprocess images with the original torch loader ---
+    images_torch = load_and_preprocess_images(image_paths).to(device)
+    print(f"[Data] Preprocessed image tensor shape (torch): {images_torch.shape}")
+
+    # --- Convert torch images -> Needle Tensor ---
+    # VGGT_needle expects shape [S, 3, H, W] or [B, S, 3, H, W], same as torch.
+    images_np = images_torch.detach().cpu().numpy().astype("float32")
+    images_needle = needle.Tensor(images_np).to(device=device)
+
+    # --- Run inference with Needle model ---
+    print("[VGGT] Running inference with VGGT_needle...")
+    with torch.no_grad():  # harmless for Needle; keeps torch ops out of grad mode
+        predictions_needle = model(images_needle)
+
+    # --- Extract pose_enc and convert Needle -> torch for downstream utilities ---
+    if "pose_enc" not in predictions_needle:
+        raise KeyError("Model predictions do not contain 'pose_enc' key.")
+
+    pose_enc_needle = predictions_needle["pose_enc"]
+
+    if isinstance(pose_enc_needle, needle.Tensor):
+        nd = pose_enc_needle.realize_cached_data()  # NDArray
+        pose_enc_np = nd.numpy()                    # numpy array
+        pose_enc_torch = torch.from_numpy(pose_enc_np).to(device)
+    else:
+        # In case the model already returns a torch.Tensor
+        pose_enc_torch = pose_enc_needle
+
+    # --- Convert pose encoding to extrinsic and intrinsic matrices (torch utils) ---
+    print("[VGGT] Converting pose encoding to extrinsic and intrinsic matrices...")
+    extrinsic, _ = pose_encoding_to_extri_intri(
+        pose_enc_torch, images_torch.shape[-2:]
     )
 
-    # To numpy, drop batch dimension if present: e.g. (1, N, 3, 4) -> (N, 3, 4)
+    # --- To numpy, drop batch dimension if present: e.g. (1, N, 3, 4) -> (N, 3, 4) ---
     extrinsic_np = extrinsic.detach().cpu().numpy()
     if extrinsic_np.ndim == 4:
         # assume (1, N, 3, 4) or (1, N, 4, 4)
@@ -165,23 +212,26 @@ def main(images_dir: str, output_csv: str):
     if extrinsic_np.ndim != 3 or extrinsic_np.shape[1] not in (3, 4):
         raise RuntimeError(f"Unexpected extrinsic shape: {extrinsic_np.shape}")
 
-    # Compute camera poses
-    poses = compute_camera_pose_quat(extrinsic_np)   # (N, 7)
+    # --- Compute camera poses (x, y, z, qw, qx, qy, qz) ---
+    poses = compute_camera_pose_quat(extrinsic_np)  # (N, 7)
     assert poses.shape[0] == len(image_paths)
 
-    # Save CSV
+    # --- Save CSV ---
     header = "x,y,z,qw,qx,qy,qz"
     np.savetxt(
         output_csv,
         poses,
         delimiter=",",
         header=header,
-        comments=""
+        comments="",
     )
 
     print(f"[Output] Saved {poses.shape[0]} poses to: {output_csv}")
     print(f"[Output] CSV header: {header}")
     print("[Note] Row i corresponds to sorted(image_paths)[i].")
+
+    # Clean up CUDA memory
+    torch.cuda.empty_cache()
 
 
 # -----------------------------------------------------------------------------
@@ -189,7 +239,7 @@ def main(images_dir: str, output_csv: str):
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Run VGGT on a folder of images and export camera poses as (x,y,z,qw,qx,qy,qz)."
+        description="Run VGGT_needle on a folder of images and export camera poses as (x,y,z,qw,qx,qy,qz)."
     )
     parser.add_argument(
         "--images",
@@ -203,7 +253,13 @@ if __name__ == "__main__":
         default="camera_poses_xyz_quat.csv",
         help="Output CSV file path.",
     )
+    parser.add_argument(
+        "--max-images",
+        type=int,
+        default=24,
+        help="Max number of images to use (subsampled if more are present) to avoid GPU OOM.",
+    )
 
     args = parser.parse_args()
 
-    main(args.images, args.out)
+    main(args.images, args.out, args.max_images)

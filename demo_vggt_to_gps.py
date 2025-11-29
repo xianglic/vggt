@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import argparse
-from vggt.transform import VGGT2GPS
+import simplekml
+from transform_gps.transform import VGGT2GPS
 
 def main():
     # Parse command line arguments
@@ -37,6 +38,24 @@ def main():
     # Save to new CSV file
     gps_df.to_csv(output_path, index=False)
     print(f"Conversion completed. Results saved to {output_path}")
+
+    df = pd.read_csv(output_path)
+
+    # save to new kml file
+    kml = simplekml.Kml()
+
+    # Add a line (path)
+    coords = list(zip(df.longitude, df.latitude, df.altitude))
+    linestring = kml.newlinestring(name="GPS Path", coords=coords)
+    linestring.altitudemode = simplekml.AltitudeMode.absolute   # use real altitude
+    linestring.extrude = 1
+    linestring.tessellate = 1
+
+    # Save KML
+    kml_output_path = output_path.replace(".csv", ".kml")
+    kml.save(kml_output_path)
+    print(f"Saved as {kml_output_path}")
+
 
 if __name__ == "__main__":
     main() 
