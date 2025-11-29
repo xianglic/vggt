@@ -23,7 +23,7 @@ from vggt_needle.models.vggt import VGGT as VGGT_needle
 from vggt.utils.load_fn import load_and_preprocess_images
 from vggt.utils.pose_enc import pose_encoding_to_extri_intri
 from vggt.utils.geometry import unproject_depth_map_to_point_map
-from helper import sd_torch2needle
+from transform.helper import sd_torch2needle
 import needle
 
 device = "cuda" if torch.cuda.is_available() else "cpu"

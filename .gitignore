@@ -151,6 +151,8 @@ skyseg.onnx
 # personalized ignore
 examples/drone/
 .gradio/
+transform/*.csv
+transform/*.json
 
 # ignore the vim artifact
 *~
