@@ -147,3 +147,10 @@ skyseg.onnx
 # pixi environments
 .pixi
 *.egg-info
+
+
+.gradio
+examples/
+input_images*/
+transform_gps/
+my_code.zip
